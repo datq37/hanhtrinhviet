@@ -59,6 +59,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
     const trimmedEmail = formState.email.trim().toLowerCase();
 
     try {
+      console.log("Auth submit start", { mode, email: trimmedEmail });
       if (!trimmedEmail) {
         setSubmitError("Vui lòng nhập email hợp lệ.");
         setIsSubmitting(false);
@@ -97,12 +98,14 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         });
 
         if (signUpResult.error) {
+          console.error("Supabase signUp error", signUpResult.error);
           setSubmitError(signUpResult.error.message);
           setIsSubmitting(false);
           return;
         }
 
         if (!signUpResult.data.session) {
+          console.warn("SignUp không trả session", signUpResult.data);
           setSubmitError(
             "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác nhận trước khi đăng nhập.",
           );
@@ -116,6 +119,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         });
 
         if (error) {
+          console.error("Supabase signIn error", error);
           setSubmitError(error.message);
           setIsSubmitting(false);
           return;
@@ -125,6 +129,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      console.log("getUser result", user);
 
       if (!user?.id) {
         setSubmitError("Không thể xác thực người dùng. Vui lòng thử lại.");
@@ -158,6 +163,10 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           },
         ]);
 
+      if (profileInsertError) {
+        console.error("profile insert error", profileInsertError);
+      }
+
       if (profileInsertError && profileInsertError.code !== "23505") {
         setSubmitError("Không thể lưu hồ sơ: " + profileInsertError.message);
         setIsSubmitting(false);
@@ -176,6 +185,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           .eq("id", user.id);
 
         if (profileUpdateError) {
+          console.error("profile update error", profileUpdateError);
           setSubmitError("Không thể cập nhật hồ sơ: " + profileUpdateError.message);
           setIsSubmitting(false);
           return;
@@ -192,6 +202,10 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           onConflict: "profile_id",
         });
 
+      if (walletError) {
+        console.error("wallet upsert error", walletError);
+      }
+
       if (walletError && walletError.code !== "23505") {
         setSubmitError("Không thể khởi tạo ví: " + walletError.message);
         setIsSubmitting(false);
@@ -206,6 +220,10 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         .maybeSingle();
 
       if (updatedProfile.error) {
+        console.error("profile fetch error", updatedProfile.error);
+      }
+
+      if (updatedProfile.error) {
         setSubmitError("Không thể tải thông tin tài khoản: " + updatedProfile.error.message);
         setIsSubmitting(false);
         return;
@@ -215,6 +233,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
       setIsSubmitting(false);
 
       const destination = updatedProfile.data?.role === "admin" ? "/quan-tri" : "/tai-khoan";
+      console.log("Redirecting to", destination);
       router.push(destination);
 
       setTimeout(() => {
