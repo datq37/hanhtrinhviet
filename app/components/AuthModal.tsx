@@ -1,6 +1,8 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSupabase } from "../context/SupabaseContext";
 
 type AuthMode = "login" | "register";
 
@@ -18,6 +20,8 @@ interface FormState {
 }
 
 export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
+  const router = useRouter();
+  const { supabase, refreshProfile } = useSupabase();
   const [formState, setFormState] = useState<FormState>({
     fullName: "",
     email: "",
@@ -26,6 +30,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const resetForm = () => {
     setFormState({
@@ -35,6 +40,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
       password: "",
     });
     setIsSubmitting(false);
+    setSubmitError(null);
   };
 
   const handleClose = () => {
@@ -48,61 +54,126 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const trimmedEmail = formState.email.trim().toLowerCase();
 
     try {
-      const trimmedEmail = formState.email.trim();
-      const normalizedEmail = trimmedEmail.toLowerCase();
-      const isAdminCredentials =
-        mode === "login" &&
-        normalizedEmail === "admin@travelvn.vn" &&
-        formState.password === "admin123";
-
-      const userData = {
-        name: isAdminCredentials
-          ? "Quản trị viên Travel VN"
-          : mode === "register"
-          ? formState.fullName?.trim() || "Thành viên Travel VN"
-          : formState.email?.split("@")[0] || "Thành viên Travel VN",
-        email: trimmedEmail,
-        phone: isAdminCredentials
-          ? ""
-          : formState.phone?.trim() ||
-            localStorage.getItem("travelvn-last-phone") ||
-            "",
-        role: isAdminCredentials ? "admin" : "user",
-      };
-
-      if (userData.phone) {
-        localStorage.setItem("travelvn-last-phone", userData.phone);
+      if (!trimmedEmail) {
+        setSubmitError("Vui lòng nhập email hợp lệ.");
+        setIsSubmitting(false);
+        return;
       }
 
-      localStorage.setItem("travelvn-user", JSON.stringify(userData));
-      window.dispatchEvent(new Event("travelvn-auth-change"));
-    } catch (error) {
-      console.error("Không thể lưu thông tin đăng nhập:", error);
-    }
-    setShowSuccess(true);
+      if (!formState.password) {
+        setSubmitError("Vui lòng nhập mật khẩu.");
+        setIsSubmitting(false);
+        return;
+      }
 
-    setTimeout(() => {
-      handleClose();
-      if (mode === "login" || mode === "register") {
-        const stored = localStorage.getItem("travelvn-user");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            const target =
-              parsed.role === "admin" ? "/quan-tri" : "/tai-khoan";
-            window.location.href = target;
-            return;
-          } catch {
-            /* ignore parsing errors and fall through */
-          }
+      if (mode === "register") {
+        if (!formState.fullName?.trim()) {
+          setSubmitError("Vui lòng nhập họ tên.");
+          setIsSubmitting(false);
+          return;
         }
-        window.location.href = "/tai-khoan";
+
+        if (!formState.phone?.trim()) {
+          setSubmitError("Vui lòng nhập số điện thoại.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+          email: trimmedEmail,
+          password: formState.password,
+        });
+
+        if (error) {
+          setSubmitError(error.message);
+          setIsSubmitting(false);
+          return;
+        }
+
+        const userId = data.user?.id;
+        if (!userId) {
+          setSubmitError("Không thể tạo tài khoản. Vui lòng thử lại.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: userId,
+            full_name: formState.fullName.trim(),
+            phone: formState.phone.trim(),
+            role: "user",
+          });
+
+        if (profileError) {
+          setSubmitError("Không thể lưu hồ sơ: " + profileError.message);
+          setIsSubmitting(false);
+          return;
+        }
+
+        const { error: walletError } = await supabase
+          .from("wallets")
+          .insert({ profile_id: userId });
+
+        if (walletError && walletError.code !== "23505") {
+          setSubmitError("Không thể khởi tạo ví: " + walletError.message);
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: trimmedEmail,
+          password: formState.password,
+        });
+
+        if (error) {
+          setSubmitError(error.message);
+          setIsSubmitting(false);
+          return;
+        }
       }
-    }, 1200);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        setSubmitError("Không thể xác thực người dùng. Vui lòng thử lại.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { data: profileData, error: profileFetchError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profileFetchError) {
+        setSubmitError("Không thể tải thông tin tài khoản: " + profileFetchError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      await refreshProfile();
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        handleClose();
+        const destination = profileData?.role === "admin" ? "/quan-tri" : "/tai-khoan";
+        router.push(destination);
+      }, 1200);
+    } catch (error) {
+      console.error("Lỗi xử lý xác thực:", error);
+      setSubmitError("Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -273,17 +344,20 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-full bg-[#00C951] px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-lg shadow-[#00C951]/20 transition hover:bg-[#00b347] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
-              >
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full rounded-full bg-[#00C951] px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-lg shadow-[#00C951]/20 transition hover:bg-[#00b347] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
+                >
                 {isSubmitting
                   ? "Đang xử lý..."
                   : mode === "login"
                   ? "Đăng nhập"
                   : "Đăng ký"}
               </button>
+              {submitError && (
+                <p className="text-center text-sm text-rose-500">{submitError}</p>
+              )}
 
               <p className="text-center text-xs text-gray-500">
                 Khi tiếp tục, bạn đồng ý với các điều khoản sử dụng và chính

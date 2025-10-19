@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SupabaseProvider } from "./context/SupabaseContext";
 
 export const metadata: Metadata = {
   title: "Travel Wonder - Discover Your Next Adventure",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="bg-white font-sans">{children}</body>
+      <body className="bg-white font-sans">
+        <SupabaseProvider>{children}</SupabaseProvider>
+      </body>
     </html>
   );
 }

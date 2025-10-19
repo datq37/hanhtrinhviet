@@ -1,123 +1,94 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import MainHeader from "../components/MainHeader";
 import Footer from "../sections/Footer";
+import { useSupabase } from "../context/SupabaseContext";
 
 interface DepositRequest {
-  id: string;
-  email: string;
-  name: string;
+  id: number;
+  profile_id: string;
   amount: number;
   status: "pending" | "approved" | "rejected";
-  createdAt: string;
-  processedAt?: string;
+  created_at: string;
+  processed_at: string | null;
+  profiles?: {
+    full_name: string;
+    email?: string;
+    phone?: string;
+  };
 }
 
-const formatCurrency = (value: number) =>
-  `${value.toLocaleString("vi-VN")}₫`;
-
-const DEPOSIT_STORAGE_KEY = "travelvn-deposit-requests";
+const formatCurrency = (value: number) => `${value.toLocaleString("vi-VN")}₫`;
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const { profile, supabase, loading: authLoading } = useSupabase();
   const [requests, setRequests] = useState<DepositRequest[]>([]);
-  const [adminName, setAdminName] = useState("Quản trị viên Travel VN");
+  const [isLoading, setIsLoading] = useState(false);
+  const [processingId, setProcessingId] = useState<number | null>(null);
 
-  const loadRequests = useCallback(() => {
-    if (typeof window === "undefined") return;
+  const loadRequests = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const stored = localStorage.getItem(DEPOSIT_STORAGE_KEY);
-      if (!stored) {
-        setRequests([]);
-        return;
-      }
-      const parsed: DepositRequest[] = JSON.parse(stored);
-      const sorted = parsed.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-      setRequests(sorted);
-    } catch {
-      setRequests([]);
+      const { data, error } = await supabase
+        .from("deposit_requests")
+        .select("id, profile_id, amount, status, created_at, processed_at, profiles(full_name, phone)")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setRequests(data ?? []);
+    } catch (error) {
+      console.error("Không thể tải danh sách yêu cầu nạp tiền:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedUser = localStorage.getItem("travelvn-user");
-    if (!storedUser) {
-      window.location.href = "/";
+    if (authLoading) return;
+    if (!profile) {
+      router.replace("/");
       return;
     }
-    try {
-      const parsed = JSON.parse(storedUser);
-      if (parsed.role !== "admin") {
-        window.location.href = "/";
-        return;
-      }
-      setAdminName(parsed.name || "Quản trị viên Travel VN");
-      loadRequests();
-    } catch {
-      window.location.href = "/";
+    if (profile.role !== "admin") {
+      router.replace("/");
+      return;
     }
-  }, [loadRequests]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handleSync = () => loadRequests();
-    window.addEventListener("travelvn-deposit-change", handleSync);
-    return () => window.removeEventListener("travelvn-deposit-change", handleSync);
-  }, [loadRequests]);
+    loadRequests();
+  }, [authLoading, profile, router, loadRequests]);
 
   const pendingRequests = useMemo(
     () => requests.filter((request) => request.status === "pending"),
     [requests],
   );
+
   const approvedAmount = useMemo(
     () =>
       requests
         .filter((request) => request.status === "approved")
-        .reduce((total, request) => total + request.amount, 0),
+        .reduce((sum, req) => sum + req.amount, 0),
     [requests],
   );
 
-  const updateRequestStatus = useCallback(
-    (requestId: string, status: "approved" | "rejected") => {
-      if (typeof window === "undefined") return;
-      try {
-        const stored = localStorage.getItem(DEPOSIT_STORAGE_KEY);
-        const parsed: DepositRequest[] = stored ? JSON.parse(stored) : [];
-        let balanceUpdated = false;
-        const updated = parsed.map((request) => {
-          if (request.id !== requestId) return request;
-          if (request.status !== "pending") return request;
-          const next: DepositRequest = {
-            ...request,
-            status,
-            processedAt: new Date().toISOString(),
-          };
-          if (status === "approved" && !balanceUpdated) {
-            const balanceKey = `travelvn-wallet-${request.email}`;
-            const currentBalance = Number(localStorage.getItem(balanceKey));
-            const safeBalance =
-              Number.isFinite(currentBalance) && currentBalance >= 0
-                ? currentBalance
-                : 0;
-            const finalBalance = safeBalance + request.amount;
-            localStorage.setItem(balanceKey, finalBalance.toString());
-            balanceUpdated = true;
-          }
-          return next;
-        });
-        localStorage.setItem(DEPOSIT_STORAGE_KEY, JSON.stringify(updated));
-        window.dispatchEvent(new Event("travelvn-deposit-change"));
-        setRequests(updated);
-      } catch {
-        /* ignore update errors */
-      }
-    },
-    [],
-  );
+  const handleAction = async (requestId: number, action: "approve" | "reject") => {
+    setProcessingId(requestId);
+    try {
+      const procedure = action === "approve" ? "approve_deposit_request" : "reject_deposit_request";
+      const { error } = await supabase.rpc(procedure, {
+        p_request_id: requestId,
+      });
+
+      if (error) throw error;
+      await loadRequests();
+    } catch (error) {
+      console.error("Không thể cập nhật yêu cầu nạp tiền:", error);
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -127,40 +98,24 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-8 rounded-3xl border border-white/10 bg-slate-900/60 p-10 shadow-2xl backdrop-blur">
             <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">
-                  Travel VN Admin
-                </p>
-                <h1 className="mt-3 text-3xl font-semibold">
-                  Bảng điều khiển quản trị
-                </h1>
+                <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">Travel VN Admin</p>
+                <h1 className="mt-3 text-3xl font-semibold">Bảng điều khiển quản trị</h1>
                 <p className="mt-2 text-sm text-white/70">
-                  Xin chào, {adminName}. Quản lý yêu cầu nạp tiền và theo dõi giao dịch của khách hàng.
+                  Xin chào, {profile?.full_name ?? "Quản trị viên"}. Quản lý yêu cầu nạp tiền và theo dõi giao dịch của khách hàng.
                 </p>
               </div>
               <div className="grid gap-4 text-sm text-white/80 md:grid-cols-3">
                 <div className="rounded-2xl bg-white/10 px-5 py-4">
-                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-                    Yêu cầu chờ duyệt
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-amber-300">
-                    {pendingRequests.length}
-                  </p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">Yêu cầu chờ duyệt</p>
+                  <p className="mt-2 text-2xl font-bold text-amber-300">{pendingRequests.length}</p>
                 </div>
                 <div className="rounded-2xl bg-white/10 px-5 py-4">
-                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-                    Tổng yêu cầu
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-white">
-                    {requests.length}
-                  </p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">Tổng yêu cầu</p>
+                  <p className="mt-2 text-2xl font-bold text-white">{requests.length}</p>
                 </div>
                 <div className="rounded-2xl bg-white/10 px-5 py-4">
-                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-                    Đã cộng cho khách
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-emerald-300">
-                    {formatCurrency(approvedAmount)}
-                  </p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">Đã cộng cho khách</p>
+                  <p className="mt-2 text-2xl font-bold text-emerald-300">{formatCurrency(approvedAmount)}</p>
                 </div>
               </div>
             </header>
@@ -172,18 +127,18 @@ export default function AdminDashboardPage() {
                   Cập nhật theo thời gian thực
                 </span>
               </div>
-              {requests.length === 0 ? (
+              {isLoading ? (
+                <div className="px-6 py-12 text-center text-sm text-white/60">Đang tải dữ liệu...</div>
+              ) : requests.length === 0 ? (
                 <div className="px-6 py-12 text-center text-sm text-white/60">
-                  Hiện chưa có yêu cầu nạp tiền nào. Hệ thống sẽ hiển thị tại đây ngay khi khách hàng gửi yêu cầu.
+                  Hiện chưa có yêu cầu nạp tiền nào. Khi khách hàng gửi yêu cầu, hệ thống sẽ hiển thị tại đây.
                 </div>
               ) : (
                 <div className="divide-y divide-white/5">
                   {requests.map((request) => {
-                    const createdAt = new Date(request.createdAt).toLocaleString(
-                      "vi-VN",
-                    );
-                    const processedAt = request.processedAt
-                      ? new Date(request.processedAt).toLocaleString("vi-VN")
+                    const createdAt = new Date(request.created_at).toLocaleString("vi-VN");
+                    const processedAt = request.processed_at
+                      ? new Date(request.processed_at).toLocaleString("vi-VN")
                       : null;
                     const statusColor =
                       request.status === "pending"
@@ -197,6 +152,7 @@ export default function AdminDashboardPage() {
                         : request.status === "approved"
                         ? "Đã cộng tiền"
                         : "Đã từ chối";
+
                     return (
                       <div
                         key={request.id}
@@ -204,24 +160,17 @@ export default function AdminDashboardPage() {
                       >
                         <div>
                           <p className="text-base font-semibold text-white">
-                            {request.name}
+                            {request.profiles?.full_name ?? "Khách hàng"}
                           </p>
                           <p className="mt-1 text-sm text-white/70">
-                            {request.email}
+                            Số tiền: {formatCurrency(request.amount)}
                           </p>
-                          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-white/50">
-                            {createdAt}
-                          </p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.3em] text-white/50">{createdAt}</p>
                           {processedAt && (
-                            <p className="mt-1 text-xs text-white/50">
-                              Xử lý: {processedAt}
-                            </p>
+                            <p className="mt-1 text-xs text-white/50">Xử lý: {processedAt}</p>
                           )}
                         </div>
                         <div className="flex flex-col items-start gap-3 md:items-end">
-                          <p className="text-xl font-semibold text-emerald-300">
-                            {formatCurrency(request.amount)}
-                          </p>
                           <span
                             className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${statusColor}`}
                           >
@@ -230,19 +179,23 @@ export default function AdminDashboardPage() {
                           <div className="flex flex-wrap gap-2">
                             <button
                               type="button"
-                              onClick={() => updateRequestStatus(request.id, "approved")}
-                              disabled={request.status !== "pending"}
+                              onClick={() => handleAction(request.id, "approve")}
+                              disabled={request.status !== "pending" || processingId === request.id}
                               className="rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40"
                             >
-                              Cộng tiền
+                              {processingId === request.id && request.status === "pending"
+                                ? "Đang cộng..."
+                                : "Cộng tiền"}
                             </button>
                             <button
                               type="button"
-                              onClick={() => updateRequestStatus(request.id, "rejected")}
-                              disabled={request.status !== "pending"}
+                              onClick={() => handleAction(request.id, "reject")}
+                              disabled={request.status !== "pending" || processingId === request.id}
                               className="rounded-full bg-rose-500/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40"
                             >
-                              Từ chối
+                              {processingId === request.id && request.status === "pending"
+                                ? "Đang từ chối..."
+                                : "Từ chối"}
                             </button>
                           </div>
                         </div>

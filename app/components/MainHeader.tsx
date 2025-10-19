@@ -2,8 +2,9 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import AuthModal from "./AuthModal";
+import { useSupabase } from "../context/SupabaseContext";
 
 type HeaderVariant = "translucent" | "solid" | "dark";
 
@@ -27,35 +28,20 @@ export default function MainHeader({
 }: MainHeaderProps) {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<
-    { name: string; email: string; phone?: string; role?: "user" | "admin" }
-  >();
+  const { supabase, profile } = useSupabase();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-  useEffect(() => {
-    const loadUser = () => {
-      try {
-        const stored = localStorage.getItem("travelvn-user");
-        setCurrentUser(stored ? JSON.parse(stored) : undefined);
-      } catch (error) {
-        console.error("Không thể đọc thông tin người dùng:", error);
-        setCurrentUser(undefined);
-      }
-    };
-
-    loadUser();
-    window.addEventListener("travelvn-auth-change", loadUser);
-    return () => {
-      window.removeEventListener("travelvn-auth-change", loadUser);
-    };
-  }, []);
-
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      localStorage.removeItem("travelvn-user");
-      window.dispatchEvent(new Event("travelvn-auth-change"));
-      window.location.href = "/";
+      setIsSigningOut(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Không thể đăng xuất:", error);
+      }
     } catch (error) {
       console.error("Không thể đăng xuất:", error);
+    } finally {
+      setIsSigningOut(false);
     }
   };
 
@@ -176,11 +162,11 @@ export default function MainHeader({
               <Link href="/luu-tru" className={navClass(variant)}>
                 Lưu Trú
               </Link>
-              {currentUser?.role === "admin" ? (
+              {profile?.role === "admin" ? (
                 <Link href="/quan-tri" className={navClass(variant)}>
                   Quản Trị
                 </Link>
-              ) : currentUser ? (
+              ) : profile ? (
                 <Link href="/tai-khoan" className={navClass(variant)}>
                   Tài Khoản
                 </Link>
@@ -189,22 +175,23 @@ export default function MainHeader({
           </motion.nav>
 
           <div className="flex flex-1 items-center justify-end gap-2">
-            {currentUser ? (
+            {profile ? (
               <>
                 <Link
-                  href={currentUser.role === "admin" ? "/quan-tri" : "/tai-khoan"}
+                  href={profile.role === "admin" ? "/quan-tri" : "/tai-khoan"}
                   className={actionButtonClass}
                 >
-                  {currentUser.role === "admin"
+                  {profile.role === "admin"
                     ? "Quản Trị"
-                    : currentUser.name?.split(" ").slice(-1).join(" ") || "Tài khoản"}
+                    : profile.full_name?.split(" ").slice(-1).join(" ") || "Tài khoản"}
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className={actionButtonClass}
+                  className={`${actionButtonClass} ${isSigningOut ? "opacity-60" : ""}`}
                   type="button"
+                  disabled={isSigningOut}
                 >
-                  Đăng Xuất
+                  {isSigningOut ? "Đang thoát..." : "Đăng Xuất"}
                 </button>
               </>
             ) : (
@@ -218,7 +205,7 @@ export default function MainHeader({
                 <button
                   onClick={() => setIsRegisterOpen(true)}
                   className={actionButtonClass}
-                >
+                  >
                   Đăng Ký
                 </button>
               </>
