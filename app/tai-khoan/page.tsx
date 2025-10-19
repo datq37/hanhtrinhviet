@@ -315,12 +315,6 @@ export default function AccountPage() {
     }
   };
 
-  const handleRetryLoad = () => {
-    if (profile?.id) {
-      loadAccountData();
-    }
-  };
-
   if (authLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
