@@ -89,7 +89,7 @@ const stayCatalog = [
 ];
 
 export default function AccountPage() {
-  const { profile, supabase, loading: authLoading } = useSupabase();
+  const { profile, supabase, loading: authLoading, refreshProfile } = useSupabase();
   const [balance, setBalance] = useState(0);
   const [frozenBalance, setFrozenBalance] = useState(0);
   const [depositAmount, setDepositAmount] = useState("");
@@ -186,6 +186,13 @@ export default function AccountPage() {
     if (!profile?.id) return;
     loadAccountData();
   }, [profile?.id, loadAccountData]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!profile) {
+      refreshProfile();
+    }
+  }, [authLoading, profile, refreshProfile]);
 
   const handleCopy = async (value: string) => {
     try {
@@ -307,6 +314,30 @@ export default function AccountPage() {
       setIsProcessingBooking(false);
     }
   };
+
+  const handleRetryLoad = () => {
+    if (profile?.id) {
+      loadAccountData();
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        <p className="text-sm text-white/70">Đang tải tài khoản...</p>
+      </main>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        <div className="rounded-3xl border border-white/10 bg-white/5 px-8 py-10 text-center">
+          <p className="text-lg font-semibold text-white">Vui lòng đăng nhập để xem tài khoản.</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
