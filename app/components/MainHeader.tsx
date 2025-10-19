@@ -38,6 +38,7 @@ export default function MainHeader({
       if (error) {
         console.error("Không thể đăng xuất:", error);
       }
+      window.location.href = "/";
     } catch (error) {
       console.error("Không thể đăng xuất:", error);
     } finally {
