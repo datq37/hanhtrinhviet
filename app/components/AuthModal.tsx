@@ -84,35 +84,20 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           return;
         }
 
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email: trimmedEmail,
           password: formState.password,
+          options: {
+            data: {
+              full_name: formState.fullName.trim(),
+              phone: formState.phone.trim(),
+              role: "user",
+            },
+          },
         });
 
         if (error) {
           setSubmitError(error.message);
-          setIsSubmitting(false);
-          return;
-        }
-
-        const userId = data.user?.id;
-        if (!userId) {
-          setSubmitError("Không thể tạo tài khoản. Vui lòng thử lại.");
-          setIsSubmitting(false);
-          return;
-        }
-
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .upsert({
-            id: userId,
-            full_name: formState.fullName.trim(),
-            phone: formState.phone.trim(),
-            role: "user",
-          });
-
-        if (profileError) {
-          setSubmitError("Không thể lưu hồ sơ: " + profileError.message);
           setIsSubmitting(false);
           return;
         }
@@ -149,24 +134,24 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         return;
       }
 
-      const { data: profileData, error: profileFetchError } = await supabase
+      await refreshProfile();
+      const updatedProfile = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (profileFetchError) {
-        setSubmitError("Không thể tải thông tin tài khoản: " + profileFetchError.message);
+      if (updatedProfile.error) {
+        setSubmitError("Không thể tải thông tin tài khoản: " + updatedProfile.error.message);
         setIsSubmitting(false);
         return;
       }
 
-      await refreshProfile();
       setShowSuccess(true);
 
       setTimeout(() => {
         handleClose();
-        const destination = profileData?.role === "admin" ? "/quan-tri" : "/tai-khoan";
+        const destination = updatedProfile.data?.role === "admin" ? "/quan-tri" : "/tai-khoan";
         router.push(destination);
       }, 1200);
     } catch (error) {
