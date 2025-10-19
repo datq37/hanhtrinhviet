@@ -212,12 +212,14 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
       }
 
       setShowSuccess(true);
+      setIsSubmitting(false);
+
+      const destination = updatedProfile.data?.role === "admin" ? "/quan-tri" : "/tai-khoan";
+      router.push(destination);
 
       setTimeout(() => {
         handleClose();
-        const destination = updatedProfile.data?.role === "admin" ? "/quan-tri" : "/tai-khoan";
-        router.push(destination);
-      }, 1200);
+      }, 500);
     } catch (error) {
       console.error("Lỗi xử lý xác thực:", error);
       setSubmitError("Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
