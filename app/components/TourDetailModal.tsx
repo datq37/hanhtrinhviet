@@ -2,11 +2,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+interface Review {
+  id: string;
+  name: string;
+  rating: number;
+  content: string;
+  createdAt: string;
+}
+
 interface TourDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   tour: {
-    id: string;
+    id: string | number;
     name: string;
     location: string;
     image: string;
