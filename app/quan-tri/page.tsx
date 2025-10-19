@@ -14,11 +14,21 @@ interface DepositRequest {
   created_at: string;
   processed_at: string | null;
   profiles?: {
-    full_name: string;
-    email?: string;
-    phone?: string;
-  };
+    full_name: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
 }
+
+type DepositRequestRow = {
+  id: number;
+  profile_id: string;
+  amount: number;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  processed_at: string | null;
+  profiles: { full_name: string | null; phone: string | null }[] | null;
+};
 
 const formatCurrency = (value: number) => `${value.toLocaleString("vi-VN")}₫`;
 
@@ -38,7 +48,18 @@ export default function AdminDashboardPage() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setRequests(data ?? []);
+      const normalized: DepositRequest[] = ((data ?? []) as DepositRequestRow[]).map((item) => ({
+        id: item.id,
+        profile_id: item.profile_id,
+        amount: item.amount,
+        status: item.status,
+        created_at: item.created_at,
+        processed_at: item.processed_at,
+        profiles: Array.isArray(item.profiles)
+          ? item.profiles[0] ?? null
+          : (item.profiles as DepositRequest["profiles"]),
+      }));
+      setRequests(normalized);
     } catch (error) {
       console.error("Không thể tải danh sách yêu cầu nạp tiền:", error);
     } finally {

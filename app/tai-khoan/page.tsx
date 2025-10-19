@@ -22,6 +22,22 @@ interface DepositRequest {
   processed_at: string | null;
 }
 
+type TourBookingRow = {
+  id: number;
+  total_amount: number;
+  status: "pending" | "confirmed" | "cancelled";
+  created_at: string;
+  tours: { name: string; slug: string }[] | { name: string; slug: string } | null;
+};
+
+type StayBookingRow = {
+  id: number;
+  total_amount: number;
+  status: "pending" | "confirmed" | "cancelled";
+  created_at: string;
+  stays: { name: string; slug: string }[] | { name: string; slug: string } | null;
+};
+
 const formatCurrency = (value: number) => `${value.toLocaleString("vi-VN")}₫`;
 
 const BANK_INFO = {
@@ -126,28 +142,38 @@ export default function AccountPage() {
 
       setBalance(walletData?.available_balance ?? 0);
       setFrozenBalance(walletData?.frozen_balance ?? 0);
-      setDepositRequests(depositsData ?? []);
+      setDepositRequests((depositsData ?? []) as DepositRequest[]);
 
       setTourHistory(
-        (tourBookings ?? []).map((booking) => ({
+        ((tourBookings ?? []) as TourBookingRow[]).map((booking) => {
+          const tourInfo = Array.isArray(booking.tours)
+            ? booking.tours[0] ?? null
+            : booking.tours;
+          return {
           id: booking.id.toString(),
-          name: booking.tours?.name ?? "Tour du lịch",
+          name: tourInfo?.name ?? "Tour du lịch",
           amount: booking.total_amount,
           status: booking.status === "confirmed" ? "completed" : "pending",
           date: booking.created_at,
           reference: `TOUR-${booking.id}`,
-        })),
+          };
+        }),
       );
 
       setStayHistory(
-        (stayBookings ?? []).map((booking) => ({
+        ((stayBookings ?? []) as StayBookingRow[]).map((booking) => {
+          const stayInfo = Array.isArray(booking.stays)
+            ? booking.stays[0] ?? null
+            : booking.stays;
+          return {
           id: booking.id.toString(),
-          name: booking.stays?.name ?? "Đặt phòng",
+          name: stayInfo?.name ?? "Đặt phòng",
           amount: booking.total_amount,
           status: booking.status === "confirmed" ? "completed" : "pending",
           date: booking.created_at,
           reference: `ROOM-${booking.id}`,
-        })),
+          };
+        }),
       );
     } catch (error) {
       console.error("Không thể tải dữ liệu tài khoản:", error);
