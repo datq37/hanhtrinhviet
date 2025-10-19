@@ -137,91 +137,66 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         return;
       }
 
-      const profileFullName =
-        mode === "register"
-          ? (formState.fullName ?? "").trim()
-          : (user.user_metadata.full_name as string | undefined)?.trim() ||
-            user.email?.split("@")[0] ||
-            "Thành viên Travel VN";
+      if (mode === "register") {
+        const profileFullName = (formState.fullName ?? "").trim();
+        const profilePhone = (formState.phone ?? "").trim();
+        const profileRole =
+          (user.user_metadata.role as "user" | "admin" | undefined) ?? "user";
 
-      const profilePhone =
-        mode === "register"
-          ? (formState.phone ?? "").trim()
-          : ((user.user_metadata.phone as string | undefined)?.trim() || null);
-
-      const profileRole =
-        (user.user_metadata.role as "user" | "admin" | undefined) ?? "user";
-
-      const { error: profileInsertError } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            id: user.id,
-            full_name: profileFullName,
-            phone: profilePhone,
-            role: profileRole,
-          },
-        ]);
-
-      if (profileInsertError) {
-        console.error("profile insert error", profileInsertError);
-      }
-
-      const { data: debugProfiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, role")
-        .eq("id", user.id);
-      console.log("profiles after insert", debugProfiles);
-
-      if (profileInsertError && profileInsertError.code !== "23505") {
-        setSubmitError("Không thể lưu hồ sơ: " + profileInsertError.message);
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (profileInsertError && profileInsertError.code === "23505") {
-        const { error: profileUpdateError } = await supabase
+        const { error: profileInsertError } = await supabase
           .from("profiles")
-          .update({
-            full_name: profileFullName,
-            phone: profilePhone,
-            role: profileRole,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", user.id);
+          .insert([
+            {
+              id: user.id,
+              full_name: profileFullName,
+              phone: profilePhone,
+              role: profileRole,
+            },
+          ]);
 
-        if (profileUpdateError) {
-          console.error("profile update error", profileUpdateError);
-          setSubmitError("Không thể cập nhật hồ sơ: " + profileUpdateError.message);
-          setIsSubmitting(false);
+        if (profileInsertError) {
+          console.error("profile insert error", profileInsertError);
+        }
+
+        if (profileInsertError && profileInsertError.code !== "23505") {
+          setSubmitError("Không thể lưu hồ sơ: " + profileInsertError.message);
           return;
         }
-      }
 
-      const { error: walletError } = await supabase
-        .from("wallets")
-        .upsert([
-          {
-            profile_id: user.id,
-          },
-        ], {
-          onConflict: "profile_id",
-        });
+        if (profileInsertError && profileInsertError.code === "23505") {
+          const { error: profileUpdateError } = await supabase
+            .from("profiles")
+            .update({
+              full_name: profileFullName,
+              phone: profilePhone,
+              role: profileRole,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
 
-      if (walletError) {
-        console.error("wallet upsert error", walletError);
-      }
+          if (profileUpdateError) {
+            console.error("profile update error", profileUpdateError);
+            setSubmitError("Không thể cập nhật hồ sơ: " + profileUpdateError.message);
+            return;
+          }
+        }
 
-      const { data: debugWallets } = await supabase
-        .from("wallets")
-        .select("profile_id, available_balance")
-        .eq("profile_id", user.id);
-      console.log("wallets after upsert", debugWallets);
+        const { error: walletError } = await supabase
+          .from("wallets")
+          .insert(
+            [
+              {
+                profile_id: user.id,
+              },
+            ],
+            { defaultToNull: false },
+          );
 
-      if (walletError && walletError.code !== "23505") {
-        setSubmitError("Không thể khởi tạo ví: " + walletError.message);
-        setIsSubmitting(false);
-        return;
+        if (walletError && walletError.code !== "23505") {
+          console.error("wallet insert error", walletError);
+          setSubmitError("Không thể khởi tạo ví: " + walletError.message);
+          return;
+        }
       }
 
       await refreshProfile();
