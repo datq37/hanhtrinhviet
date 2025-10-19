@@ -223,6 +223,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
     } catch (error) {
       console.error("Lỗi xử lý xác thực:", error);
       setSubmitError("Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
+    } finally {
       setIsSubmitting(false);
     }
   };
