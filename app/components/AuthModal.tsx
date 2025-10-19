@@ -160,6 +160,8 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
 
         if (profileInsertError && profileInsertError.code !== "23505") {
           setSubmitError("Không thể lưu hồ sơ: " + profileInsertError.message);
+          setIsSubmitting(false);
+          setShowSuccess(false);
           return;
         }
 
@@ -195,6 +197,8 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         if (walletError && walletError.code !== "23505") {
           console.error("wallet insert error", walletError);
           setSubmitError("Không thể khởi tạo ví: " + walletError.message);
+          setIsSubmitting(false);
+          setShowSuccess(false);
           return;
         }
       }
@@ -230,6 +234,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
       console.error("Lỗi xử lý xác thực:", error);
       setSubmitError("Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
     } finally {
+      console.log("Auth submit finally");
       setIsSubmitting(false);
     }
   };
