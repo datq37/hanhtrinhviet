@@ -84,7 +84,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const signUpResult = await supabase.auth.signUp({
           email: trimmedEmail,
           password: formState.password,
           options: {
@@ -96,12 +96,19 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           },
         });
 
-        if (error) {
-          setSubmitError(error.message);
+        if (signUpResult.error) {
+          setSubmitError(signUpResult.error.message);
           setIsSubmitting(false);
           return;
         }
 
+        if (!signUpResult.data.session) {
+          setSubmitError(
+            "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác nhận trước khi đăng nhập.",
+          );
+          setIsSubmitting(false);
+          return;
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
@@ -125,16 +132,70 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         return;
       }
 
-      if (mode === "register") {
-        const { error: walletError } = await supabase
-          .from("wallets")
-          .insert({ profile_id: user.id });
+      const profileFullName =
+        mode === "register"
+          ? (formState.fullName ?? "").trim()
+          : (user.user_metadata.full_name as string | undefined)?.trim() ||
+            user.email?.split("@")[0] ||
+            "Thành viên Travel VN";
 
-        if (walletError && walletError.code !== "23505") {
-          setSubmitError("Không thể khởi tạo ví: " + walletError.message);
+      const profilePhone =
+        mode === "register"
+          ? (formState.phone ?? "").trim()
+          : ((user.user_metadata.phone as string | undefined)?.trim() || null);
+
+      const profileRole =
+        (user.user_metadata.role as "user" | "admin" | undefined) ?? "user";
+
+      const { error: profileInsertError } = await supabase
+        .from("profiles")
+        .insert([
+          {
+            id: user.id,
+            full_name: profileFullName,
+            phone: profilePhone,
+            role: profileRole,
+          },
+        ]);
+
+      if (profileInsertError && profileInsertError.code !== "23505") {
+        setSubmitError("Không thể lưu hồ sơ: " + profileInsertError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (profileInsertError && profileInsertError.code === "23505") {
+        const { error: profileUpdateError } = await supabase
+          .from("profiles")
+          .update({
+            full_name: profileFullName,
+            phone: profilePhone,
+            role: profileRole,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+
+        if (profileUpdateError) {
+          setSubmitError("Không thể cập nhật hồ sơ: " + profileUpdateError.message);
           setIsSubmitting(false);
           return;
         }
+      }
+
+      const { error: walletError } = await supabase
+        .from("wallets")
+        .upsert([
+          {
+            profile_id: user.id,
+          },
+        ], {
+          onConflict: "profile_id",
+        });
+
+      if (walletError && walletError.code !== "23505") {
+        setSubmitError("Không thể khởi tạo ví: " + walletError.message);
+        setIsSubmitting(false);
+        return;
       }
 
       await refreshProfile();
