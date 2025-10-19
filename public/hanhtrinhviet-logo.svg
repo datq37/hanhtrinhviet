@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
+  <defs>
+    <linearGradient id="shade" x1="0%" x2="100%" y1="0%" y2="0%">
+      <stop offset="0%" stop-color="#1f7a0a" />
+      <stop offset="100%" stop-color="#2a9c12" />
+    </linearGradient>
+  </defs>
+  <rect width="500" height="500" fill="none" />
+  <g fill="url(#shade)">
+    <path d="M90 220c0-48 32-86 78-97l122-28c59-14 120 21 140 78l16 46c10 30-9 62-40 69l-274 66c-27 6-52-15-52-43z" />
+    <path d="M128 270c0-14 11-26 25-26h35c14 0 25 12 25 26v8c0 14-11 26-25 26h-35c-14 0-25-12-25-26z" fill="#fff" />
+    <path d="M340 180c32 0 58 26 58 58s-26 58-58 58h-64c-21 0-37-17-37-38v-14c0-21 16-38 37-38z" fill="#fff" />
+    <path d="M252 244h57c7 0 13 6 13 13v13c0 7-6 13-13 13h-57c-7 0-13-6-13-13v-13c0-7 6-13 13-13z" />
+    <path d="M154 324h18c3 0 5 3 4 6-3 9-9 19-21 19s-18-10-21-19c-1-3 1-6 4-6z" />
+    <path d="M336 300h19c3 0 5 3 4 6-3 9-9 19-21 19s-18-10-21-19c-1-3 1-6 4-6z" />
+  </g>
+  <g transform="translate(60 360)">
+    <path d="M0 40c40-60 90-90 150-90 60 0 110 30 150 90" fill="none" stroke="#1f7a0a" stroke-width="12" stroke-linecap="round" />
+  </g>
+  <g fill="#1f7a0a" font-family="'Brush Script MT', 'Pacifico', cursive" text-anchor="middle">
+    <text x="250" y="340" font-size="82">Hanhtrinhviet</text>
+  </g>
+  <g fill="#1f7a0a" font-family="Montserrat, 'Helvetica Neue', Arial, sans-serif" font-weight="600" letter-spacing="10">
+    <text x="250" y="390" font-size="28" text-anchor="middle">TOUR AND TRAVEL</text>
+  </g>
+</svg>
