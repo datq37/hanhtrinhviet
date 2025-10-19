@@ -167,6 +167,12 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         console.error("profile insert error", profileInsertError);
       }
 
+      const { data: debugProfiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, role")
+        .eq("id", user.id);
+      console.log("profiles after insert", debugProfiles);
+
       if (profileInsertError && profileInsertError.code !== "23505") {
         setSubmitError("Không thể lưu hồ sơ: " + profileInsertError.message);
         setIsSubmitting(false);
@@ -205,6 +211,12 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
       if (walletError) {
         console.error("wallet upsert error", walletError);
       }
+
+      const { data: debugWallets } = await supabase
+        .from("wallets")
+        .select("profile_id, available_balance")
+        .eq("profile_id", user.id);
+      console.log("wallets after upsert", debugWallets);
 
       if (walletError && walletError.code !== "23505") {
         setSubmitError("Không thể khởi tạo ví: " + walletError.message);
