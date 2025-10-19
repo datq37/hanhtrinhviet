@@ -102,15 +102,6 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           return;
         }
 
-        const { error: walletError } = await supabase
-          .from("wallets")
-          .insert({ profile_id: userId });
-
-        if (walletError && walletError.code !== "23505") {
-          setSubmitError("Không thể khởi tạo ví: " + walletError.message);
-          setIsSubmitting(false);
-          return;
-        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
@@ -132,6 +123,18 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         setSubmitError("Không thể xác thực người dùng. Vui lòng thử lại.");
         setIsSubmitting(false);
         return;
+      }
+
+      if (mode === "register") {
+        const { error: walletError } = await supabase
+          .from("wallets")
+          .insert({ profile_id: user.id });
+
+        if (walletError && walletError.code !== "23505") {
+          setSubmitError("Không thể khởi tạo ví: " + walletError.message);
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       await refreshProfile();
