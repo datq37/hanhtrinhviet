@@ -198,42 +198,41 @@ export default function TourDetailModal({
           return;
         }
 
-        const mapped: ModalReview[] =
-          (data ?? [])
-            .map((row: Record<string, unknown>) => {
-              const content =
-                typeof row.comment === "string" ? row.comment.trim() : "";
-              if (!content.length) {
-                return null;
-              }
-              const iso =
-                typeof row.created_at === "string" && row.created_at
-                  ? row.created_at
-                  : new Date().toISOString();
-              const author =
-                typeof row.author_name === "string" && row.author_name.trim().length
-                  ? row.author_name.trim()
-                  : anonymousReviewer;
-              const ratingValue =
-                typeof row.rating === "number"
-                  ? row.rating
-                  : Number.parseInt(String(row.rating ?? 5), 10);
-              return {
-                id:
-                  typeof row.id === "string"
-                    ? row.id
-                    : typeof row.id === "number"
-                    ? row.id.toString()
-                    : `remote-${Math.random().toString(36).slice(2, 10)}`,
-                author,
-                rating: clampRating(ratingValue),
-                content,
-                createdAt: iso,
-                timestamp: formatReviewTimestamp(iso),
-                source: "remote" as const,
-              };
-            })
-            .filter((item): item is ModalReview => Boolean(item));
+        const mapped: ModalReview[] = [];
+        for (const row of data ?? []) {
+          const record = row as Record<string, unknown>;
+          const content =
+            typeof record.comment === "string" ? record.comment.trim() : "";
+          if (!content.length) {
+            continue;
+          }
+          const iso =
+            typeof record.created_at === "string" && record.created_at
+              ? record.created_at
+              : new Date().toISOString();
+          const author =
+            typeof record.author_name === "string" && record.author_name.trim().length
+              ? record.author_name.trim()
+              : anonymousReviewer;
+          const ratingValue =
+            typeof record.rating === "number"
+              ? record.rating
+              : Number.parseInt(String(record.rating ?? 5), 10);
+          mapped.push({
+            id:
+              typeof record.id === "string"
+                ? record.id
+                : typeof record.id === "number"
+                ? record.id.toString()
+                : `remote-${Math.random().toString(36).slice(2, 10)}`,
+            author,
+            rating: clampRating(ratingValue),
+            content,
+            createdAt: iso,
+            timestamp: formatReviewTimestamp(iso),
+            source: "remote",
+          });
+        }
 
         setRemoteReviews(mapped);
       })
