@@ -15,7 +15,7 @@ export default function Footer() {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <h3 className="text-2xl font-bold">Travel Vietnam</h3>
+            <h3 className="text-2xl font-bold">HÀNH TRÌNH VIỆT</h3>
             <p className="text-gray-400">
               Khám phá vẻ đẹp Việt Nam cùng chúng tôi. Chuyên tổ chức các tour
               du lịch chất lượng cao với giá cả hợp lý.
@@ -199,7 +199,7 @@ export default function Footer() {
         <div className="mt-16 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              © 2024 Travel Vietnam. All rights reserved.
+              © 2024 HÀNH TRÌNH VIỆT. All rights reserved.
             </p>
             <div className="flex space-x-6">
               <Link
