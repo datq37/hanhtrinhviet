@@ -182,13 +182,15 @@ export default function TourDetailModal({
     setReviewsLoading(true);
     setReviewsError(null);
 
-    supabase
-      .from("tour_reviews")
-      .select("id, author_name, rating, comment, created_at")
-      .eq("tour_id", tour.id)
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data, error }) => {
+    const fetchRemoteReviews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("tour_reviews")
+          .select("id, author_name, rating, comment, created_at")
+          .eq("tour_id", tour.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
         if (!isMounted) return;
         if (error) {
           setReviewsError(
@@ -235,8 +237,7 @@ export default function TourDetailModal({
         }
 
         setRemoteReviews(mapped);
-      })
-      .catch((error) => {
+      } catch (error) {
         if (!isMounted) return;
         setReviewsError(
           error instanceof Error
@@ -244,11 +245,13 @@ export default function TourDetailModal({
             : "Không thể tải danh sách đánh giá. Vui lòng thử lại sau.",
         );
         setRemoteReviews([]);
-      })
-      .finally(() => {
+      } finally {
         if (!isMounted) return;
         setReviewsLoading(false);
-      });
+      }
+    };
+
+    void fetchRemoteReviews();
 
     return () => {
       isMounted = false;
