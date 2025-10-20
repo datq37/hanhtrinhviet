@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-8 rounded-3xl border border-white/10 bg-slate-900/60 p-10 shadow-2xl backdrop-blur">
             <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">Travel VN Admin</p>
+                <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">HÀNH TRÌNH VIỆT Admin</p>
                 <h1 className="mt-3 text-3xl font-semibold">Bảng điều khiển quản trị</h1>
                 <p className="mt-2 text-sm text-white/70">
                   Xin chào, {profile?.full_name ?? "Quản trị viên"}. Quản lý yêu cầu nạp tiền và theo dõi giao dịch của khách hàng.

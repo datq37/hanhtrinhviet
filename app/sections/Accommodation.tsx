@@ -480,7 +480,7 @@ export default function Accommodation({
         <div className="relative overflow-hidden rounded-[40px] shadow-2xl">
           <Image
             src="https://media.baosonla.org.vn/public/linhlv/2024-10-21/nha-nghi-cong-dong-tai-khu-du-lich-moc-chau-happy-land_.jpg"
-            alt="Không gian lưu trú Travel VN"
+            alt="Không gian lưu trú HÀNH TRÌNH VIỆT"
             fill
             className="object-cover"
             priority
@@ -496,7 +496,7 @@ export default function Accommodation({
               </h2>
               <p className="text-base text-white/90">
                 Homestay cảm hứng, khách sạn boutique hay resort sang trọng – đội
-                ngũ Travel VN tuyển chọn tỉ mỉ để mỗi đêm nghỉ đều đáng nhớ. Chúng
+                ngũ HÀNH TRÌNH VIỆT tuyển chọn tỉ mỉ để mỗi đêm nghỉ đều đáng nhớ. Chúng
                 tôi đồng hành từ khâu chọn phòng đến những setup bất ngờ dành riêng
                 cho bạn.
               </p>

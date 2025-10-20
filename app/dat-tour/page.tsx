@@ -846,7 +846,7 @@ export default function BookingPage() {
 
         setTourBookingStatus({
           status: "success",
-          message: `Đặt tour "${tourName}" thành công! Đội ngũ Travel VN sẽ liên hệ xác nhận trong 24 giờ.`,
+          message: `Đặt tour "${tourName}" thành công! Đội ngũ HÀNH TRÌNH VIỆT sẽ liên hệ xác nhận trong 24 giờ.`,
           activeId: tourId,
         });
         await refreshProfile();
@@ -888,7 +888,7 @@ export default function BookingPage() {
       <section className="relative overflow-hidden py-24 text-white">
         <Image
           src="https://hanoitourist.vn/sites/default/files/inline-images/gvghv_0.jpg"
-          alt="Đoàn khách Travel VN"
+          alt="Đoàn khách HÀNH TRÌNH VIỆT"
           fill
           className="object-cover"
           priority
@@ -897,7 +897,7 @@ export default function BookingPage() {
         <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6 pt-16 lg:flex-row lg:items-center">
           <div className="max-w-2xl space-y-6">
             <p className="inline-flex items-center rounded-full bg-white/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em]">
-              Travel VN Concierge
+              HÀNH TRÌNH VIỆT Concierge
             </p>
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
               Đặt tour riêng theo phong cách của bạn
@@ -924,7 +924,7 @@ export default function BookingPage() {
               Vì sao bạn chọn chúng tôi
             </h2>
             <p className="mt-3 text-base text-slate-600">
-              Travel VN biến mọi chuyến đi thành trải nghiệm đáng nhớ, với hệ sinh
+              HÀNH TRÌNH VIỆT biến mọi chuyến đi thành trải nghiệm đáng nhớ, với hệ sinh
               thái dịch vụ được thiết kế riêng cho từng nhóm khách.
             </p>
           </div>
@@ -952,7 +952,7 @@ export default function BookingPage() {
         <div className="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-[1.1fr,0.9fr] lg:items-center">
           <div className="space-y-6 text-white">
             <p className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em]">
-              Travel VN Planner
+              HÀNH TRÌNH VIỆT Planner
             </p>
             <h2 className="text-3xl font-semibold md:text-4xl">
               Chia sẻ mong muốn, chúng tôi lo phần còn lại
@@ -1140,7 +1140,7 @@ export default function BookingPage() {
               Hình ảnh các chuyến đi
             </h2>
             <p className="mt-3 text-base text-slate-600">
-              Những khoảnh khắc đáng nhớ mà Travel VN đã đồng hành cùng khách hàng
+              Những khoảnh khắc đáng nhớ mà HÀNH TRÌNH VIỆT đã đồng hành cùng khách hàng
               trên khắp mọi miền đất nước.
             </p>
           </div>
@@ -1152,7 +1152,7 @@ export default function BookingPage() {
               >
                 <Image
                   src={src}
-                  alt="Khoảnh khắc tour Travel VN"
+                  alt="Khoảnh khắc tour HÀNH TRÌNH VIỆT"
                   fill
                   className="object-cover transition duration-500 group-hover:scale-110"
                 />
@@ -1171,7 +1171,7 @@ export default function BookingPage() {
               Đồng hành cùng chúng tôi
             </h2>
             <p className="text-base text-slate-600">
-              Hơn 200 doanh nghiệp, tổ chức và trường học đã lựa chọn Travel VN là
+              Hơn 200 doanh nghiệp, tổ chức và trường học đã lựa chọn HÀNH TRÌNH VIỆT là
               đối tác tổ chức tour. Chúng tôi tự hào mang tới những giải pháp du
               lịch linh hoạt, bền vững và gắn kết cộng đồng.
             </p>
@@ -1187,7 +1187,7 @@ export default function BookingPage() {
             <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-xl">
               <Image
                 src="/images/doingu.png"
-                alt="Đối tác Travel VN"
+                alt="Đối tác HÀNH TRÌNH VIỆT"
                 width={720}
                 height={480}
                 className="w-full object-cover"
@@ -1205,7 +1205,7 @@ export default function BookingPage() {
               Feedback khách hàng
             </h2>
             <p className="mt-3 text-base text-slate-600">
-              Nghe khách nói về hành trình họ đã trải qua cùng Travel VN và đội ngũ
+              Nghe khách nói về hành trình họ đã trải qua cùng HÀNH TRÌNH VIỆT và đội ngũ
               concierge tận tâm.
             </p>
           </div>

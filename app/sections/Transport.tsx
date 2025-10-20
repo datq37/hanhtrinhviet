@@ -231,7 +231,7 @@ export default function Transport() {
               Hành trình trọn vẹn bắt đầu từ cách bạn di chuyển
             </h2>
             <p className="text-sm text-slate-600 md:text-base">
-              Từ xe riêng sang trọng đến chuyến tàu tuyệt đẹp, Travel VN sắp
+              Từ xe riêng sang trọng đến chuyến tàu tuyệt đẹp, HÀNH TRÌNH VIỆT sắp
               xếp mọi chặng đường để bạn chỉ tập trung tận hưởng. Dịch vụ concierge
               chủ động 24/7 giúp hành trình luôn mượt mà.
             </p>
@@ -279,7 +279,7 @@ export default function Transport() {
               Thuê xe riêng theo yêu cầu
             </h3>
             <p className="mt-3 text-sm text-slate-600">
-              Chọn điểm đến, loại xe và thời gian. Đội Travel VN sẽ phản hồi
+              Chọn điểm đến, loại xe và thời gian. Đội HÀNH TRÌNH VIỆT sẽ phản hồi
               ngay với lịch xe khả dụng và bảng giá chi tiết.
             </p>
 
@@ -404,7 +404,7 @@ export default function Transport() {
                     Yêu cầu đã được ghi nhận
                   </h4>
                   <p className="mt-2 text-emerald-700">
-                    Đội ngũ Travel VN sẽ kiểm tra lịch xe khả dụng và gửi báo
+                    Đội ngũ HÀNH TRÌNH VIỆT sẽ kiểm tra lịch xe khả dụng và gửi báo
                     giá trong 30 phút.
                   </p>
                   <div className="mt-4 space-y-2 text-emerald-800">
@@ -438,7 +438,7 @@ export default function Transport() {
                     Chúng tôi sẽ liên hệ ngay
                   </h4>
                   <p className="mt-3">
-                    Sau khi gửi yêu cầu, concierge Travel VN sẽ gọi lại với lịch
+                    Sau khi gửi yêu cầu, concierge HÀNH TRÌNH VIỆT sẽ gọi lại với lịch
                     trình gợi ý và bảng giá chi tiết.
                   </p>
                 </motion.div>

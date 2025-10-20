@@ -261,7 +261,7 @@ export default function AccountPage() {
       if (error) throw error;
 
       setBookingMessage(
-        `Đặt tour "${tour.name}" thành công! Đội ngũ Travel VN sẽ liên hệ xác nhận trong 24 giờ.`,
+        `Đặt tour "${tour.name}" thành công! Đội ngũ HÀNH TRÌNH VIỆT sẽ liên hệ xác nhận trong 24 giờ.`,
       );
       await loadAccountData();
     } catch (error) {
@@ -343,7 +343,7 @@ export default function AccountPage() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">
-                  Travel VN Account
+                  HÀNH TRÌNH VIỆT Account
                 </p>
                 <h1 className="mt-3 text-3xl font-semibold">
                   {authLoading
@@ -562,11 +562,11 @@ export default function AccountPage() {
                 <ul className="space-y-3 text-sm text-white/70">
                   <li>• Thời gian xử lý nạp tiền: 5-10 phút trong giờ hành chính, tối đa 2 giờ ngoài giờ.</li>
                   <li>• Nội dung chuyển khoản phải ghi đúng số điện thoại đã đăng ký để hệ thống tự động cộng tiền.</li>
-                  <li>• Liên hệ trợ lý Travel VN qua hotline 1900 636 545 khi cần hỗ trợ.</li>
+                  <li>• Liên hệ trợ lý HÀNH TRÌNH VIỆT qua hotline 1900 636 545 khi cần hỗ trợ.</li>
                   <li>• Số dư đóng băng là khoản tạm giữ cho các dịch vụ đang xử lý.</li>
                 </ul>
                 <div className="rounded-2xl bg-white/10 p-4 text-xs text-white/60">
-                  <p>Mọi giao dịch nạp tiền được ghi nhận trên hệ thống Travel VN.</p>
+                  <p>Mọi giao dịch nạp tiền được ghi nhận trên hệ thống HÀNH TRÌNH VIỆT.</p>
                   <p className="mt-2">
                     Chúng tôi cam kết bảo mật thông tin cá nhân và chỉ sử dụng nhằm phục vụ hành trình của bạn.
                   </p>
@@ -627,7 +627,7 @@ export default function AccountPage() {
                 </span>
               </div>
               <p className="mt-2 text-sm text-white/60">
-                Chọn lưu trú mong muốn, Travel VN sẽ trừ tiền và gửi xác nhận sớm nhất.
+                Chọn lưu trú mong muốn, HÀNH TRÌNH VIỆT sẽ trừ tiền và gửi xác nhận sớm nhất.
               </p>
 
               <div className="mt-6 space-y-4">

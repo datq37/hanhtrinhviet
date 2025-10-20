@@ -115,7 +115,7 @@ export default function MainHeader({
                     : "text-slate-900"
                 }`}
                 >
-                  Travel VN
+                  HÀNH TRÌNH VIỆT
                 </motion.span>
               </motion.button>
             ) : (
@@ -146,7 +146,7 @@ export default function MainHeader({
                         : "text-slate-900"
                     }`}
                   >
-                    Travel VN
+                    HÀNH TRÌNH VIỆT
                   </motion.span>
                 </motion.div>
               </Link>

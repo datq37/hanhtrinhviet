@@ -361,7 +361,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
 
           <div className="bg-gradient-to-br from-[#00C951] via-[#00af4d] to-[#00863e] px-10 pb-16 pt-12 text-white">
             <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs uppercase tracking-[0.3em]">
-              Travel VN
+              HÀNH TRÌNH VIỆT
             </span>
             <h2 className="mt-5 text-3xl font-semibold leading-tight">{title}</h2>
             <p className="mt-4 text-sm text-white/80">{description}</p>
@@ -498,7 +498,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
 
               <p className="text-center text-xs text-gray-500">
                 Khi tiếp tục, bạn đồng ý với các điều khoản sử dụng và chính
-                sách bảo mật của Travel VN.
+                sách bảo mật của HÀNH TRÌNH VIỆT.
               </p>
             </form>
           )}

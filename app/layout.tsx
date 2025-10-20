@@ -3,9 +3,9 @@ import "./globals.css";
 import { SupabaseProvider } from "./context/SupabaseContext";
 
 export const metadata: Metadata = {
-  title: "Travel Wonder - Discover Your Next Adventure",
+  title: "HÀNH TRÌNH VIỆT - Khám phá chuyến đi mơ ước",
   description:
-    "Explore amazing destinations around the world with Travel Wonder. Book your next adventure today!",
+    "Khám phá những hành trình đặc sắc cùng HÀNH TRÌNH VIỆT và đặt tour trọn gói cho kỳ nghỉ đáng nhớ của bạn.",
 };
 
 export default function RootLayout({
