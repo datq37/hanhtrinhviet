@@ -1,14 +1,8 @@
+"use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-interface Review {
-  id: string;
-  name: string;
-  rating: number;
-  content: string;
-  createdAt: string;
-}
 
 interface TourDetailModalProps {
   isOpen: boolean;
@@ -28,6 +22,7 @@ interface TourDetailModalProps {
     meals: string;
     tickets: string;
     tourType: string;
+    bookingSlug?: string;
     schedule: {
       day: string;
       title: string;
@@ -36,7 +31,22 @@ interface TourDetailModalProps {
   };
   initialAdultCount?: number;
   initialChildCount?: number;
-  initialReviews?: Review[];
+  onBook?: (payload: {
+    tourId: string | number;
+    tourName: string;
+    adultCount: number;
+    childCount: number;
+    totalAmount: number;
+    baseAdultPrice: number;
+    baseChildPrice: number;
+    bookingSlug?: string;
+  }) => void;
+  bookingState?: {
+    isLoading?: boolean;
+    successMessage?: string | null;
+    errorMessage?: string | null;
+    activeTourId?: string | number | null;
+  };
 }
 
 export default function TourDetailModal({
@@ -45,8 +55,11 @@ export default function TourDetailModal({
   tour,
   initialAdultCount = 2,
   initialChildCount = 0,
-  initialReviews,
+  onBook,
+  bookingState,
 }: TourDetailModalProps) {
+  const bookingEnabled = typeof onBook === "function";
+
   const parsePrice = (value?: number, text?: string) => {
     if (typeof value === "number" && !Number.isNaN(value)) {
       return value;
@@ -69,47 +82,13 @@ export default function TourDetailModal({
 
   const [adultQty, setAdultQty] = useState(initialAdultCount);
   const [childQty, setChildQty] = useState(initialChildCount);
-  const [reviews, setReviews] = useState<Review[]>(
-    initialReviews && initialReviews.length > 0
-      ? initialReviews
-      : [
-          {
-            id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-1`,
-            name: "Ngọc Anh",
-            rating: 5,
-            content:
-              "Hành trình tuyệt vời, lịch trình hợp lý và hướng dẫn viên siêu dễ thương.",
-            createdAt: new Date().toISOString(),
-          },
-        ],
-  );
-  const [reviewerName, setReviewerName] = useState("");
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewContent, setReviewContent] = useState("");
-  const [showAllReviews, setShowAllReviews] = useState(false);
 
   useEffect(() => {
-    setReviews(
-      initialReviews && initialReviews.length > 0
-        ? initialReviews
-        : [
-            {
-              id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-1`,
-              name: "Ngọc Anh",
-              rating: 5,
-              content:
-                "Hành trình tuyệt vời, lịch trình hợp lý và hướng dẫn viên siêu dễ thương.",
-              createdAt: new Date().toISOString(),
-            },
-          ],
-    );
+    if (!isOpen) return;
+
     setAdultQty(initialAdultCount);
     setChildQty(initialChildCount);
-    setReviewerName("");
-    setReviewRating(5);
-    setReviewContent("");
-    setShowAllReviews(false);
-  }, [initialAdultCount, initialChildCount, initialReviews, tour.id]);
+  }, [isOpen, initialAdultCount, initialChildCount, tour.id]);
 
   const priceHighlight = `${formatCurrency(
     baseAdultPrice,
@@ -118,24 +97,26 @@ export default function TourDetailModal({
   const totalPrice =
     adultQty * baseAdultPrice + childQty * baseChildPrice;
 
-  const handleAddReview = () => {
-    if (!reviewerName.trim() || !reviewContent.trim()) {
-      return;
-    }
-
-    const newReview: Review = {
-      id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-      name: reviewerName.trim(),
-      rating: reviewRating,
-      content: reviewContent.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    setReviews((prev) => [newReview, ...prev]);
-    setReviewerName("");
-    setReviewRating(5);
-    setReviewContent("");
+  const handleBook = () => {
+    if (!onBook) return;
+    onBook({
+      tourId: tour.id,
+      tourName: tour.name,
+      adultCount: adultQty,
+      childCount: childQty,
+      totalAmount: totalPrice,
+      baseAdultPrice,
+      baseChildPrice,
+      bookingSlug: tour.bookingSlug,
+    });
   };
+
+  const isProcessingBooking =
+    bookingState?.activeTourId === tour.id && bookingState?.isLoading;
+  const bookingSuccessMessage =
+    bookingState?.activeTourId === tour.id ? bookingState?.successMessage ?? null : null;
+  const bookingErrorMessage =
+    bookingState?.activeTourId === tour.id ? bookingState?.errorMessage ?? null : null;
 
   const tourHighlights = [
     {
@@ -328,57 +309,59 @@ export default function TourDetailModal({
               </div>
 
               {/* Price Calculator */}
-              <div className="rounded-2xl bg-gray-800/60 p-6 space-y-4">
-                <h3 className="text-xl font-semibold text-white">
-                  Tính chi phí dự kiến
-                </h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-                      Người lớn
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={adultQty}
-                      onChange={(event) =>
-                        setAdultQty(
-                          Math.max(1, Math.floor(Number(event.target.value) || 0)),
-                        )
-                      }
-                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white focus:border-emerald-300 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-200/40"
-                    />
+              {bookingEnabled && (
+                <div className="rounded-2xl bg-gray-800/60 p-6 space-y-4">
+                  <h3 className="text-xl font-semibold text-white">
+                    Tính chi phí dự kiến
+                  </h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+                        Người lớn
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={adultQty}
+                        onChange={(event) =>
+                          setAdultQty(
+                            Math.max(1, Math.floor(Number(event.target.value) || 0)),
+                          )
+                        }
+                        className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white focus:border-emerald-300 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-200/40"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+                        Trẻ em
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={childQty}
+                        onChange={(event) =>
+                          setChildQty(
+                            Math.max(0, Math.floor(Number(event.target.value) || 0)),
+                          )
+                        }
+                        className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white focus:border-emerald-300 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-200/40"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-                      Trẻ em
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={childQty}
-                      onChange={(event) =>
-                        setChildQty(
-                          Math.max(0, Math.floor(Number(event.target.value) || 0)),
-                        )
-                      }
-                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white focus:border-emerald-300 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-200/40"
-                    />
+                  <p className="text-sm text-white/70">
+                    Giá người lớn: {formatCurrency(baseAdultPrice)} · Giá trẻ em:{" "}
+                    {formatCurrency(baseChildPrice)}
+                  </p>
+                  <div className="flex items-center justify-between rounded-xl bg-gray-900/70 p-4">
+                    <span className="text-xs uppercase tracking-[0.3em] text-white/60">
+                      Tổng tạm tính
+                    </span>
+                    <span className="text-2xl font-semibold text-emerald-400">
+                      {formatCurrency(totalPrice)}
+                    </span>
                   </div>
                 </div>
-                <p className="text-sm text-white/70">
-                  Giá người lớn: {formatCurrency(baseAdultPrice)} · Giá trẻ em:{" "}
-                  {formatCurrency(baseChildPrice)}
-                </p>
-                <div className="flex items-center justify-between rounded-xl bg-gray-900/70 p-4">
-                  <span className="text-xs uppercase tracking-[0.3em] text-white/60">
-                    Tổng tạm tính
-                  </span>
-                  <span className="text-2xl font-semibold text-emerald-400">
-                    {formatCurrency(totalPrice)}
-                  </span>
-                </div>
-              </div>
+              )}
 
               {/* Tour Description */}
               <div>
@@ -424,153 +407,69 @@ export default function TourDetailModal({
               </div>
 
               {/* Price and Booking */}
-              <div className="bg-[#00C951]/10 rounded-xl p-6 backdrop-blur-sm space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-gray-300 mb-1 uppercase tracking-[0.3em] text-xs">
-                      Tổng tạm tính
-                    </p>
-                    <p className="text-3xl font-bold text-white">
-                      {formatCurrency(totalPrice)}
-                    </p>
-                    <p className="text-sm text-white/70">
-                      {adultQty} người lớn · {childQty} trẻ em
-                    </p>
+              {bookingEnabled && (
+                <div className="bg-[#00C951]/10 rounded-xl p-6 backdrop-blur-sm space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-gray-300 mb-1 uppercase tracking-[0.3em] text-xs">
+                        Tổng tạm tính
+                      </p>
+                      <p className="text-3xl font-bold text-white">
+                        {formatCurrency(totalPrice)}
+                      </p>
+                      <p className="text-sm text-white/70">
+                        {adultQty} người lớn · {childQty} trẻ em
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-300 mb-1 uppercase tracking-[0.3em] text-xs">
+                        Thời gian
+                      </p>
+                      <p className="text-xl font-semibold text-white">
+                        {tour.duration}
+                      </p>
+                      <p className="text-xs text-white/70">
+                        Giá người lớn: {formatCurrency(baseAdultPrice)}
+                      </p>
+                      <p className="text-xs text-white/70">
+                        Trẻ em: {formatCurrency(baseChildPrice)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-gray-300 mb-1 uppercase tracking-[0.3em] text-xs">
-                      Thời gian
-                    </p>
-                    <p className="text-xl font-semibold text-white">
-                      {tour.duration}
-                    </p>
-                    <p className="text-xs text-white/70">
-                      Giá người lớn: {formatCurrency(baseAdultPrice)}
-                    </p>
-                    <p className="text-xs text-white/70">
-                      Trẻ em: {formatCurrency(baseChildPrice)}
-                    </p>
-                  </div>
-                </div>
-                <button className="w-full bg-[#00C951] hover:bg-[#00B347] text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center space-x-2">
-                  <span>Đặt Tour Ngay</span>
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <button
+                    type="button"
+                    onClick={handleBook}
+                    disabled={!onBook || Boolean(isProcessingBooking)}
+                    className="w-full bg-[#00C951] hover:bg-[#00B347] text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center space-x-2 disabled:cursor-not-allowed disabled:bg-[#00C951]/60"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 8l4 4m0 0l-4 4m4-4H3"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Reviews */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-white">
-                  Đánh giá từ khách hàng
-                </h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review) => (
-                    <div
-                      key={review.id}
-                      className="rounded-2xl border border-gray-800 bg-gray-900/60 p-4 shadow-inner"
+                    <span>{isProcessingBooking ? "Đang đặt..." : "Đặt Tour Ngay"}</span>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-white font-semibold">
-                          {review.name}
-                        </h4>
-                        <span className="text-[#00C951] text-sm font-medium">
-                          {"⭐".repeat(review.rating)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-300 whitespace-pre-line">
-                        {review.content}
-                      </p>
-                      <p className="mt-3 text-xs uppercase tracking-[0.3em] text-gray-500">
-                        {new Date(review.createdAt).toLocaleDateString("vi-VN")}
-                      </p>
-                    </div>
-                  ))}
-                  {reviews.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-gray-700 bg-gray-900/40 p-6 text-sm text-gray-400">
-                      Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ trải
-                      nghiệm của bạn!
-                    </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                  </button>
+                  {bookingSuccessMessage && (
+                    <p className="text-sm text-emerald-300 text-center">
+                      {bookingSuccessMessage}
+                    </p>
+                  )}
+                  {bookingErrorMessage && (
+                    <p className="text-sm text-rose-300 text-center">
+                      {bookingErrorMessage}
+                    </p>
                   )}
                 </div>
-                {reviews.length > 3 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllReviews((prev) => !prev)}
-                    className="inline-flex items-center text-sm font-semibold text-emerald-400 hover:text-emerald-300"
-                  >
-                    {showAllReviews ? "Thu gọn đánh giá" : "Xem thêm đánh giá"}
-                  </button>
-                )}
+              )}
 
-                <div className="space-y-4 rounded-2xl border border-gray-800 bg-gray-900/60 p-6">
-                  <h4 className="text-lg font-semibold text-white">
-                    Gửi đánh giá của bạn
-                  </h4>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-                        Tên của bạn
-                      </label>
-                      <input
-                        type="text"
-                        value={reviewerName}
-                        onChange={(event) => setReviewerName(event.target.value)}
-                        placeholder="VD: Trần Minh An"
-                        className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-emerald-300 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-200/40"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-                        Số sao
-                      </label>
-                      <select
-                        value={reviewRating}
-                        onChange={(event) =>
-                          setReviewRating(Number(event.target.value))
-                        }
-                        className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white focus:border-emerald-300 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-200/40"
-                      >
-                        {[5, 4, 3, 2, 1].map((rating) => (
-                          <option key={rating} value={rating} className="text-slate-900">
-                            {rating} sao
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-                        Nội dung đánh giá
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={reviewContent}
-                        onChange={(event) => setReviewContent(event.target.value)}
-                        placeholder="Chia sẻ cảm nhận của bạn về tour..."
-                        className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-emerald-300 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-200/40"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddReview}
-                    className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-emerald-400"
-                  >
-                    Gửi đánh giá
-                  </button>
-                </div>
-              </div>
             </div>
           </motion.div>
         </motion.div>

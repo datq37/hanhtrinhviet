@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white pt-20 pb-10">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {/* Company Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -72,95 +72,42 @@ export default function Footer() {
             <ul className="space-y-4">
               <li>
                 <Link
-                  href="#"
+                  href="/#about"
                   className="text-gray-400 hover:text-[#00C951] transition-colors"
                 >
-                  Trang chủ
+                  Về Chúng Tôi
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/dat-tour"
                   className="text-gray-400 hover:text-[#00C951] transition-colors"
                 >
-                  Về chúng tôi
+                  Đặt Tour
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/luu-tru"
                   className="text-gray-400 hover:text-[#00C951] transition-colors"
                 >
-                  Tour du lịch
+                  Lưu Trú
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/tai-khoan"
                   className="text-gray-400 hover:text-[#00C951] transition-colors"
                 >
-                  Tin tức
+                  Tài Khoản
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/quan-tri"
                   className="text-gray-400 hover:text-[#00C951] transition-colors"
                 >
-                  Liên hệ
-                </Link>
-              </li>
-            </ul>
-          </motion.div>
-
-          {/* Tours */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="space-y-6"
-          >
-            <h3 className="text-xl font-semibold">Tour Du Lịch</h3>
-            <ul className="space-y-4">
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-[#00C951] transition-colors"
-                >
-                  Tour Vịnh Hạ Long
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-[#00C951] transition-colors"
-                >
-                  Tour Hang Sơn Đoòng
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-[#00C951] transition-colors"
-                >
-                  Tour Phố Cổ Hội An
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-[#00C951] transition-colors"
-                >
-                  Tour Vịnh Lan Hạ
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-[#00C951] transition-colors"
-                >
-                  Tour Cao Cấp
+                  Quản Trị
                 </Link>
               </li>
             </ul>
@@ -196,11 +143,16 @@ export default function Footer() {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span className="text-gray-400">
-                  123 Đường ABC, Quận XYZ
+                <a
+                  href="https://maps.google.com/?q=Trường+Đại+học+Phenikaa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-[#00C951] transition-colors"
+                >
+                  Trường Đại học Phenikaa
                   <br />
-                  Thành phố Hà Nội, Việt Nam
-                </span>
+                  Phường Yên Nghĩa, Hà Đông, Hà Nội
+                </a>
               </li>
               <li className="flex items-center space-x-3">
                 <svg
@@ -216,7 +168,7 @@ export default function Footer() {
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                   />
                 </svg>
-                <span className="text-gray-400">1900 xxxx</span>
+                <span className="text-gray-400">(+84) 24 6291 8668</span>
               </li>
               <li className="flex items-center space-x-3">
                 <svg
@@ -232,7 +184,12 @@ export default function Footer() {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                <span className="text-gray-400">info@travel.com</span>
+                <a
+                  href="mailto:hanhtrinhviet@gmail.com"
+                  className="text-gray-400 hover:text-[#00C951] transition-colors"
+                >
+                  hanhtrinhviet@gmail.com
+                </a>
               </li>
             </ul>
           </motion.div>

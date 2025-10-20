@@ -42,9 +42,14 @@ export default function AdminDashboardPage() {
   const loadRequests = useCallback(async () => {
     setIsLoading(true);
     try {
+      if (!supabase) {
+        throw new Error("Supabase client không khả dụng. Vui lòng tải lại trang.");
+      }
       const { data, error } = await supabase
         .from("deposit_requests")
-        .select("id, profile_id, amount, status, created_at, processed_at, profiles(full_name, phone)")
+        .select(
+          "id, profile_id, amount, status, created_at, processed_at, profiles!deposit_requests_profile_id_fkey(full_name, phone)",
+        )
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -97,6 +102,9 @@ export default function AdminDashboardPage() {
   const handleAction = async (requestId: number, action: "approve" | "reject") => {
     setProcessingId(requestId);
     try {
+      if (!supabase) {
+        throw new Error("Supabase client không khả dụng. Vui lòng tải lại trang.");
+      }
       const procedure = action === "approve" ? "approve_deposit_request" : "reject_deposit_request";
       const { error } = await supabase.rpc(procedure, {
         p_request_id: requestId,

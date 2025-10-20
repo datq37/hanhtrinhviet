@@ -34,6 +34,10 @@ export default function MainHeader({
   const handleLogout = async () => {
     try {
       setIsSigningOut(true);
+      if (!supabase) {
+        console.error("Supabase client không khả dụng, không thể đăng xuất.");
+        return;
+      }
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Không thể đăng xuất:", error);

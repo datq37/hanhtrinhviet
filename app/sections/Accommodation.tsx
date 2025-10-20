@@ -15,12 +15,25 @@ export interface StayOption {
   description: string;
   image: string;
   highlights: string[];
+  bookingSlug?: string;
+}
+
+interface AccommodationProps {
+  onBookStay?: (stay: StayOption) => void;
+  bookingState?: {
+    isLoading?: boolean;
+    successMessage?: string | null;
+    errorMessage?: string | null;
+    activeStayId?: string | null;
+  };
+  onDismissFeedback?: () => void;
 }
 
 const stayOptions: StayOption[] = [
   // Đà Lạt
   {
     id: "dalat-pine-retreat",
+    bookingSlug: "stay-dalat-pine-retreat",
     name: "Đà Lạt Pine Retreat",
     location: "Đà Lạt",
     type: "homestay",
@@ -37,6 +50,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "dalat-dreamy-suite",
+    bookingSlug: "stay-dalat-dreamy-suite",
     name: "Đà Lạt Dreamy Suite",
     location: "Đà Lạt",
     type: "hotel",
@@ -53,6 +67,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "dalat-skyline-villa",
+    bookingSlug: "stay-dalat-skyline-villa",
     name: "Đà Lạt Skyline Villa",
     location: "Đà Lạt",
     type: "resort",
@@ -70,6 +85,7 @@ const stayOptions: StayOption[] = [
   // Huế
   {
     id: "hue-garden-deluxe",
+    bookingSlug: "stay-hue-garden-deluxe",
     name: "Huế Garden Deluxe",
     location: "Huế",
     type: "homestay",
@@ -86,6 +102,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "hue-heritage-suite",
+    bookingSlug: "stay-hue-heritage-suite",
     name: "Huế Heritage Suite",
     location: "Huế",
     type: "hotel",
@@ -102,6 +119,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "hue-imperial-residence",
+    bookingSlug: "stay-hue-imperial-residence",
     name: "Huế Imperial Residence",
     location: "Huế",
     type: "resort",
@@ -119,6 +137,7 @@ const stayOptions: StayOption[] = [
   // Đà Nẵng
   {
     id: "danang-coastal-chic",
+    bookingSlug: "stay-danang-coastal-chic",
     name: "Đà Nẵng Coastal Chic",
     location: "Đà Nẵng",
     type: "hotel",
@@ -135,6 +154,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "danang-marble-suite",
+    bookingSlug: "stay-danang-marble-suite",
     name: "Đà Nẵng Marble Suite",
     location: "Đà Nẵng",
     type: "hotel",
@@ -151,6 +171,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "danang-ocean-reserve",
+    bookingSlug: "stay-danang-ocean-reserve",
     name: "Đà Nẵng Ocean Reserve",
     location: "Đà Nẵng",
     type: "resort",
@@ -168,6 +189,7 @@ const stayOptions: StayOption[] = [
   // Nha Trang
   {
     id: "nhatrang-sunrise-room",
+    bookingSlug: "stay-nhatrang-sunrise-room",
     name: "Nha Trang Sunrise Room",
     location: "Nha Trang",
     type: "hotel",
@@ -184,6 +206,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "nhatrang-coral-suite",
+    bookingSlug: "stay-nhatrang-coral-suite",
     name: "Nha Trang Coral Suite",
     location: "Nha Trang",
     type: "hotel",
@@ -200,6 +223,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "nhatrang-lagoon-villa",
+    bookingSlug: "stay-nhatrang-lagoon-villa",
     name: "Nha Trang Lagoon Villa",
     location: "Nha Trang",
     type: "resort",
@@ -217,6 +241,7 @@ const stayOptions: StayOption[] = [
   // Quảng Bình
   {
     id: "quangbinh-river-lodge",
+    bookingSlug: "stay-quangbinh-river-lodge",
     name: "Quảng Bình River Lodge",
     location: "Quảng Bình",
     type: "homestay",
@@ -233,6 +258,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "quangbinh-cave-suite",
+    bookingSlug: "stay-quangbinh-cave-suite",
     name: "Quảng Bình Cave Suite",
     location: "Quảng Bình",
     type: "hotel",
@@ -249,6 +275,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "quangbinh-emerald-residence",
+    bookingSlug: "stay-quangbinh-emerald-residence",
     name: "Quảng Bình Emerald Residence",
     location: "Quảng Bình",
     type: "resort",
@@ -266,6 +293,7 @@ const stayOptions: StayOption[] = [
   // Phú Yên
   {
     id: "phuyen-bay-room",
+    bookingSlug: "stay-phuyen-bay-room",
     name: "Phú Yên Bay Room",
     location: "Phú Yên",
     type: "hotel",
@@ -282,6 +310,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "phuyen-lagoon-suite",
+    bookingSlug: "stay-phuyen-lagoon-suite",
     name: "Phú Yên Lagoon Suite",
     location: "Phú Yên",
     type: "hotel",
@@ -298,6 +327,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "phuyen-bliss-villa",
+    bookingSlug: "stay-phuyen-bliss-villa",
     name: "Phú Yên Bliss Villa",
     location: "Phú Yên",
     type: "resort",
@@ -315,6 +345,7 @@ const stayOptions: StayOption[] = [
   // Phan Thiết
   {
     id: "phanthiet-sand-room",
+    bookingSlug: "stay-phanthiet-sand-room",
     name: "Phan Thiết Sand Room",
     location: "Phan Thiết",
     type: "hotel",
@@ -331,6 +362,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "phanthiet-dune-suite",
+    bookingSlug: "stay-phanthiet-dune-suite",
     name: "Phan Thiết Dune Suite",
     location: "Phan Thiết",
     type: "hotel",
@@ -347,6 +379,7 @@ const stayOptions: StayOption[] = [
   },
   {
     id: "phanthiet-ocean-villa",
+    bookingSlug: "stay-phanthiet-ocean-villa",
     name: "Phan Thiết Ocean Villa",
     location: "Phan Thiết",
     type: "resort",
@@ -404,7 +437,11 @@ const accommodationReviews = [
   },
 ];
 
-export default function Accommodation() {
+export default function Accommodation({
+  onBookStay,
+  bookingState,
+  onDismissFeedback,
+}: AccommodationProps = {}) {
   const [filters, setFilters] = useState({
     destination: "",
     checkIn: "",
@@ -655,7 +692,10 @@ export default function Accommodation() {
           onClose={() => {
             setIsModalOpen(false);
             setSelectedStay(null);
+            onDismissFeedback?.();
           }}
+          onBook={onBookStay ? (stay) => onBookStay(stay) : undefined}
+          bookingState={bookingState}
         />
 
         <motion.section

@@ -41,7 +41,20 @@ async function fetchProfile(client: SupabaseClient, userId: string): Promise<Pro
 }
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const supabase = useRef(createSupabaseBrowserClient()).current;
+  let supabaseClient: SupabaseClient | null = null;
+  let configErrorMessage: string | null = null;
+
+  try {
+    supabaseClient = createSupabaseBrowserClient();
+  } catch (error) {
+    console.error("Không thể khởi tạo Supabase client:", error);
+    configErrorMessage =
+      "Ứng dụng chưa được cấu hình Supabase. Vui lòng bổ sung NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_ANON_KEY.";
+  }
+
+  const [configError] = useState(configErrorMessage);
+  const supabaseRef = useRef<SupabaseClient | null>(supabaseClient);
+  const supabase = supabaseRef.current;
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -50,6 +63,11 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const loadSession = useMemo(
     () =>
       async () => {
+        if (!supabase) {
+          setLoading(false);
+          return;
+        }
+
         const {
           data: { session: currentSession },
           error,
@@ -79,6 +97,11 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     loadSession();
     const {
       data: { subscription },
@@ -102,24 +125,45 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const refreshProfile = useMemo(
     () =>
       async () => {
-        if (!user?.id) return;
+        if (!supabase || !user?.id) return;
         const profileData = await fetchProfile(supabase, user.id);
         setProfile(profileData);
       },
     [supabase, user?.id],
   );
 
-  const value = useMemo(
-    () => ({
-      supabase,
-      session,
-      user,
-      profile,
-      loading,
-      refreshProfile,
-    }),
+  const value = useMemo<SupabaseContextValue | null>(
+    () =>
+      supabase
+        ? {
+            supabase,
+            session,
+            user,
+            profile,
+            loading,
+            refreshProfile,
+          }
+        : null,
     [supabase, session, user, profile, loading, refreshProfile],
   );
+
+  if (!supabase || !value) {
+    return (
+      <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center px-6 text-center">
+        <div className="max-w-lg space-y-4">
+          <h1 className="text-2xl font-semibold text-red-600">Lỗi cấu hình Supabase</h1>
+          <p>
+            {configError ??
+              "Không thể khởi tạo Supabase client. Vui lòng kiểm tra biến môi trường NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_ANON_KEY."}
+          </p>
+          <p className="text-sm text-gray-600">
+            Tham khảo tệp <code>.env.example</code> và thêm thông tin vào tệp <code>.env.local</code>, sau đó khởi động
+            lại máy chủ phát triển.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return <SupabaseContext.Provider value={value}>{children}</SupabaseContext.Provider>;
 }

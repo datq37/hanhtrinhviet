@@ -6,13 +6,29 @@ interface AccommodationModalProps {
   isOpen: boolean;
   onClose: () => void;
   stay: StayOption;
+  onBook?: (payload: StayOption) => void;
+  bookingState?: {
+    isLoading?: boolean;
+    successMessage?: string | null;
+    errorMessage?: string | null;
+    activeStayId?: string | null;
+  };
 }
 
 export default function AccommodationModal({
   isOpen,
   onClose,
   stay,
+  onBook,
+  bookingState,
 }: AccommodationModalProps) {
+  const isProcessing =
+    bookingState?.activeStayId === stay.id && bookingState?.isLoading;
+  const successMessage =
+    bookingState?.activeStayId === stay.id ? bookingState?.successMessage ?? null : null;
+  const errorMessage =
+    bookingState?.activeStayId === stay.id ? bookingState?.errorMessage ?? null : null;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -138,9 +154,11 @@ export default function AccommodationModal({
                 </div>
                 <button
                   type="button"
+                  onClick={() => onBook?.(stay)}
+                  disabled={!onBook || Boolean(isProcessing)}
                   className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-emerald-400"
                 >
-                  Đặt phòng
+                  {isProcessing ? "Đang đặt..." : "Đặt phòng"}
                   <svg
                     className="ml-2 h-5 w-5"
                     fill="none"
@@ -155,6 +173,16 @@ export default function AccommodationModal({
                     />
                   </svg>
                 </button>
+                {successMessage && (
+                  <p className="text-sm text-emerald-300 text-center md:text-left">
+                    {successMessage}
+                  </p>
+                )}
+                {errorMessage && (
+                  <p className="text-sm text-rose-300 text-center md:text-left">
+                    {errorMessage}
+                  </p>
+                )}
               </div>
             </div>
           </motion.div>

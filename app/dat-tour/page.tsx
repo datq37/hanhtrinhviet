@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useState } from "react";
 import Image from "next/image";
 import TourDetailModal from "../components/TourDetailModal";
 import MainHeader from "../components/MainHeader";
 import Footer from "../sections/Footer";
+import { useSupabase } from "../context/SupabaseContext";
 
 const formatCurrency = (value: number) =>
   `${value.toLocaleString("vi-VN")}₫`;
@@ -17,6 +18,7 @@ interface TourSchedule {
 
 interface Tour {
   id: string;
+  bookingSlug?: string;
   name: string;
   destination: string;
   location: string;
@@ -37,6 +39,7 @@ interface Tour {
 const tours: Tour[] = [
   {
     id: "dalat-flowers",
+    bookingSlug: "tour-dalat-flowers",
     name: "Đà Lạt – Thành phố ngàn hoa",
     destination: "Đà Lạt",
     location: "Lâm Đồng",
@@ -87,6 +90,7 @@ const tours: Tour[] = [
   },
   {
     id: "dalat-clouds",
+    bookingSlug: "tour-dalat-clouds",
     name: "Đà Lạt – Trải nghiệm và săn mây",
     destination: "Đà Lạt",
     location: "Lâm Đồng",
@@ -146,6 +150,7 @@ const tours: Tour[] = [
   },
   {
     id: "hue-heritage",
+    bookingSlug: "tour-hue-heritage",
     name: "Huế mộng mơ – Hành trình di sản & hương sắc cố đô",
     destination: "Huế",
     location: "Thừa Thiên Huế",
@@ -196,6 +201,7 @@ const tours: Tour[] = [
   },
   {
     id: "hue-serenity",
+    bookingSlug: "tour-hue-serenity",
     name: "Huế – Vẻ đẹp bình yên & hương sắc miền di sản",
     destination: "Huế",
     location: "Thừa Thiên Huế",
@@ -245,6 +251,7 @@ const tours: Tour[] = [
   },
   {
     id: "danang-lights",
+    bookingSlug: "tour-danang-lights",
     name: "Đà Nẵng – Biển xanh & thành phố ánh sáng",
     destination: "Đà Nẵng",
     location: "Đà Nẵng",
@@ -295,10 +302,12 @@ const tours: Tour[] = [
   },
   {
     id: "danang-hoian-spring",
+    bookingSlug: "tour-danang-hoian-spring",
     name: "Đà Nẵng – Hội An – Suối khoáng & thiên nhiên xanh",
     destination: "Đà Nẵng",
     location: "Đà Nẵng",
-    image: "https://cdn3.ivivu.com/2024/03/BN1-1744276317-5431-1744598185.jpg",
+    image:
+      "https://toquoc.mediacdn.vn/280518851207290880/2024/1/7/dsdgtdy-1704616308047440689926.jpg",
     description:
       "Kết hợp phố cổ Hội An, suối khoáng Núi Thần Tài và những trải nghiệm thư giãn tại Đà Nẵng.",
     adultPrice: 4200000,
@@ -342,11 +351,12 @@ const tours: Tour[] = [
   },
   {
     id: "nhatrang-paradise",
+    bookingSlug: "tour-nhatrang-paradise",
     name: "Nha Trang – Biển đảo thiên đường",
     destination: "Nha Trang",
     location: "Khánh Hòa",
     image:
-      "https://dulichviet.com.vn/images/bandidau/kinh-nghiem-du-lich-nha-trang-2_1689411065.jpg",
+      "https://vietnam.travel/sites/default/files/inline-images/things%20to%20do%20in%20nha%20trang-5.jpg",
     description:
       "Khám phá biển đảo, tour 3 đảo và trải nghiệm spa bùn khoáng thư giãn tại Nha Trang.",
     adultPrice: 4000000,
@@ -391,10 +401,12 @@ const tours: Tour[] = [
   },
   {
     id: "nhatrang-vinwonders",
+    bookingSlug: "tour-nhatrang-vinwonders",
     name: "Nha Trang – VinWonders – Vịnh san hô – Đồi Cừu Suối Tiên",
     destination: "Nha Trang",
     location: "Khánh Hòa",
-    image: "https://tfhomes.vn/wp-content/uploads/2023/07/tf__1_13114_vin-wonder-2.webp",
+    image:
+      "https://admin.travelsig.vn/uploads/nha_trang_duoc_binh_chon_la_thanh_pho_ven_bien_dep_nhat_the_gioi_cho_nguoi_nghi_huu_f6c3d10746.jpg",
     description:
       "Lịch trình 4N3Đ trọn vẹn cùng VinWonders, vịnh san hô Hòn Tằm và những trải nghiệm mới lạ tại Suối Tiên.",
     adultPrice: 5000000,
@@ -447,6 +459,7 @@ const tours: Tour[] = [
   },
   {
     id: "quangbinh-heritage",
+    bookingSlug: "tour-quangbinh-heritage",
     name: "Khám phá di sản thiên nhiên Phong Nha – Kỳ quan Quảng Bình",
     destination: "Quảng Bình",
     location: "Quảng Bình",
@@ -487,6 +500,7 @@ const tours: Tour[] = [
   },
   {
     id: "quangbinh-adventure",
+    bookingSlug: "tour-quangbinh-adventure",
     name: "Chinh phục Quảng Bình – Hang Tối – Sông Chày – Biển Nhật Lệ",
     destination: "Quảng Bình",
     location: "Quảng Bình",
@@ -533,6 +547,7 @@ const tours: Tour[] = [
   },
   {
     id: "phuyen-flower",
+    bookingSlug: "tour-phuyen-flower",
     name: "Phú Yên – Xứ Nẫu thơ mộng – Hoa vàng trên cỏ xanh",
     destination: "Phú Yên",
     location: "Tuy Hòa",
@@ -580,6 +595,7 @@ const tours: Tour[] = [
   },
   {
     id: "phuyen-vungr0",
+    bookingSlug: "tour-phuyen-vungro",
     name: "Phú Yên – Vịnh Vũng Rô – Đảo Nhất Tự Sơn – Ghềnh Đá Dĩa",
     destination: "Phú Yên",
     location: "Tuy Hòa",
@@ -636,6 +652,7 @@ const tours: Tour[] = [
   },
   {
     id: "phanthiet-dunes",
+    bookingSlug: "tour-phanthiet-dunes",
     name: "Phan Thiết – Mũi Né hồng – Check-in cát bay",
     destination: "Phan Thiết",
     location: "Bình Thuận",
@@ -747,11 +764,21 @@ const feedbacks = [
 ];
 
 export default function BookingPage() {
+  const { profile, supabase, refreshProfile } = useSupabase();
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState("");
   const [notes, setNotes] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+  const [tourBookingStatus, setTourBookingStatus] = useState<{
+    status: "idle" | "loading" | "success" | "error";
+    message: string;
+    activeId: string | number | null;
+  }>({
+    status: "idle",
+    message: "",
+    activeId: null,
+  });
 
   const hasCompleteFilters = Boolean(destination && startDate);
 
@@ -766,6 +793,92 @@ export default function BookingPage() {
     event.preventDefault();
     setHasSearched(true);
   };
+
+  const handleBookTour = useCallback(
+    async ({
+      tourId,
+      tourName,
+      bookingSlug,
+    }: {
+      tourId: string | number;
+      tourName: string;
+      adultCount: number;
+      childCount: number;
+      totalAmount: number;
+      baseAdultPrice: number;
+      baseChildPrice: number;
+      bookingSlug?: string;
+    }) => {
+      if (!profile?.id) {
+        setTourBookingStatus({
+          status: "error",
+          message: "Vui lòng đăng nhập để đặt tour.",
+          activeId: tourId,
+        });
+        return;
+      }
+
+      if (!bookingSlug) {
+        setTourBookingStatus({
+          status: "error",
+          message: "Tour này chưa hỗ trợ đặt trực tuyến. Vui lòng liên hệ concierge.",
+          activeId: tourId,
+        });
+        return;
+      }
+
+      setTourBookingStatus({
+        status: "loading",
+        message: "",
+        activeId: tourId,
+      });
+
+      try {
+        if (!supabase) {
+          throw new Error("Supabase client không khả dụng. Vui lòng tải lại trang.");
+        }
+        const { error } = await supabase.rpc("create_tour_booking", {
+          p_profile_id: profile.id,
+          p_tour_slug: bookingSlug,
+        });
+
+        if (error) throw error;
+
+        setTourBookingStatus({
+          status: "success",
+          message: `Đặt tour "${tourName}" thành công! Đội ngũ Travel VN sẽ liên hệ xác nhận trong 24 giờ.`,
+          activeId: tourId,
+        });
+        await refreshProfile();
+      } catch (error) {
+        console.error("Không thể đặt tour:", error);
+        const message =
+          error instanceof Error && error.message.includes("Insufficient balance")
+            ? "Số dư ví chưa đủ để đặt tour. Vui lòng nạp thêm."
+            : error instanceof Error
+            ? error.message
+            : "Không thể đặt tour. Vui lòng thử lại.";
+        setTourBookingStatus({
+          status: "error",
+          message,
+          activeId: tourId,
+        });
+      }
+    },
+    [profile?.id, refreshProfile, supabase],
+  );
+
+  const resetTourBookingStatus = useCallback(() => {
+    setTourBookingStatus((prev) =>
+      prev.status === "idle"
+        ? prev
+        : {
+            status: "idle",
+            message: "",
+            activeId: null,
+          },
+    );
+  }, []);
 
   return (
     <main className="bg-white">
@@ -950,7 +1063,10 @@ export default function BookingPage() {
                   <article
                     key={tour.id}
                     className="group flex cursor-pointer flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-lg transition hover:-translate-y-1 hover:shadow-2xl"
-                    onClick={() => setSelectedTour(tour)}
+                    onClick={() => {
+                      resetTourBookingStatus();
+                      setSelectedTour(tour);
+                    }}
                   >
                     <div className="relative h-56 w-full overflow-hidden bg-slate-200">
                       <Image
@@ -1001,7 +1117,19 @@ export default function BookingPage() {
       <TourDetailModal
         isOpen={Boolean(selectedTour)}
         tour={selectedTour ?? tours[0]}
-        onClose={() => setSelectedTour(null)}
+        onClose={() => {
+          setSelectedTour(null);
+          resetTourBookingStatus();
+        }}
+        onBook={handleBookTour}
+        bookingState={{
+          isLoading: tourBookingStatus.status === "loading",
+          successMessage:
+            tourBookingStatus.status === "success" ? tourBookingStatus.message : null,
+          errorMessage:
+            tourBookingStatus.status === "error" ? tourBookingStatus.message : null,
+          activeTourId: tourBookingStatus.activeId,
+        }}
       />
 
       {/* Gallery */}

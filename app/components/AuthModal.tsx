@@ -4,6 +4,41 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "../context/SupabaseContext";
 
+const AUTH_TIMEOUT_MS = 15000;
+
+function withTimeout<T>(
+  promise: PromiseLike<T>,
+  timeoutMessage: string,
+  timeoutMs = AUTH_TIMEOUT_MS,
+) {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+    Promise.resolve(promise)
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
+function normalizeErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    const message = error.message || "";
+    if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
+      return "Không thể kết nối tới máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.";
+    }
+    if (message.toLowerCase().includes("timeout")) {
+      return "Máy chủ phản hồi quá lâu. Vui lòng thử lại sau.";
+    }
+    return message;
+  }
+  return "Đã xảy ra lỗi không xác định. Vui lòng thử lại.";
+}
+
 type AuthMode = "login" | "register";
 
 interface AuthModalProps {
@@ -56,9 +91,21 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setSubmitError("Cấu hình Supabase chưa đầy đủ. Vui lòng liên hệ quản trị viên.");
+      setIsSubmitting(false);
+      return;
+    }
+
     const trimmedEmail = formState.email.trim().toLowerCase();
 
     try {
+      if (!supabase) {
+        setSubmitError("Không thể khởi tạo Supabase. Vui lòng tải lại trang hoặc liên hệ quản trị viên.");
+        setIsSubmitting(false);
+        return;
+      }
+
       console.log("Auth submit start", { mode, email: trimmedEmail });
       if (!trimmedEmail) {
         setSubmitError("Vui lòng nhập email hợp lệ.");
@@ -85,17 +132,20 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           return;
         }
 
-        const signUpResult = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password: formState.password,
-          options: {
-            data: {
-              full_name: formState.fullName.trim(),
-              phone: formState.phone.trim(),
-              role: "user",
+        const signUpResult = await withTimeout(
+          supabase.auth.signUp({
+            email: trimmedEmail,
+            password: formState.password,
+            options: {
+              data: {
+                full_name: formState.fullName.trim(),
+                phone: formState.phone.trim(),
+                role: "user",
+              },
             },
-          },
-        });
+          }),
+          "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+        );
 
         if (signUpResult.error) {
           console.error("Supabase signUp error", signUpResult.error);
@@ -113,10 +163,13 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           return;
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: trimmedEmail,
-          password: formState.password,
-        });
+        const { error } = await withTimeout(
+          supabase.auth.signInWithPassword({
+            email: trimmedEmail,
+            password: formState.password,
+          }),
+          "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+        );
 
         if (error) {
           console.error("Supabase signIn error", error);
@@ -128,7 +181,10 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
 
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await withTimeout(
+        supabase.auth.getUser(),
+        "Không thể xác thực người dùng. Vui lòng thử lại.",
+      );
       console.log("getUser result", user);
 
       if (!user?.id) {
@@ -143,16 +199,19 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         const profileRole =
           (user.user_metadata.role as "user" | "admin" | undefined) ?? "user";
 
-        const { error: profileInsertError } = await supabase
-          .from("profiles")
-          .insert([
-            {
-              id: user.id,
-              full_name: profileFullName,
-              phone: profilePhone,
-              role: profileRole,
-            },
-          ]);
+        const { error: profileInsertError } = await withTimeout(
+          supabase
+            .from("profiles")
+            .insert([
+              {
+                id: user.id,
+                full_name: profileFullName,
+                phone: profilePhone,
+                role: profileRole,
+              },
+            ]),
+          "Không thể lưu hồ sơ người dùng. Vui lòng thử lại sau.",
+        );
 
         if (profileInsertError) {
           console.error("profile insert error", profileInsertError);
@@ -166,15 +225,18 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         }
 
         if (profileInsertError && profileInsertError.code === "23505") {
-          const { error: profileUpdateError } = await supabase
-            .from("profiles")
-            .update({
-              full_name: profileFullName,
-              phone: profilePhone,
-              role: profileRole,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", user.id);
+          const { error: profileUpdateError } = await withTimeout(
+            supabase
+              .from("profiles")
+              .update({
+                full_name: profileFullName,
+                phone: profilePhone,
+                role: profileRole,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", user.id),
+            "Không thể cập nhật hồ sơ người dùng. Vui lòng thử lại sau.",
+          );
 
           if (profileUpdateError) {
             console.error("profile update error", profileUpdateError);
@@ -183,16 +245,19 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
           }
         }
 
-        const { error: walletError } = await supabase
-          .from("wallets")
-          .insert(
-            [
-              {
-                profile_id: user.id,
-              },
-            ],
-            { defaultToNull: false },
-          );
+        const { error: walletError } = await withTimeout(
+          supabase
+            .from("wallets")
+            .insert(
+              [
+                {
+                  profile_id: user.id,
+                },
+              ],
+              { defaultToNull: false },
+            ),
+          "Không thể khởi tạo ví điện tử. Vui lòng thử lại sau.",
+        );
 
         if (walletError && walletError.code !== "23505") {
           console.error("wallet insert error", walletError);
@@ -203,12 +268,18 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
         }
       }
 
-      await refreshProfile();
-      const updatedProfile = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
+      await withTimeout(
+        refreshProfile(),
+        "Không thể cập nhật thông tin hồ sơ. Vui lòng thử lại sau.",
+      );
+      const updatedProfile = await withTimeout(
+        supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle(),
+        "Không thể tải thông tin tài khoản. Vui lòng thử lại sau.",
+      );
 
       if (updatedProfile.error) {
         console.error("profile fetch error", updatedProfile.error);
@@ -232,7 +303,7 @@ export default function AuthModal({ isOpen, mode, onClose }: AuthModalProps) {
       }, 500);
     } catch (error) {
       console.error("Lỗi xử lý xác thực:", error);
-      setSubmitError("Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
+      setSubmitError(normalizeErrorMessage(error));
     } finally {
       console.log("Auth submit finally");
       setIsSubmitting(false);
