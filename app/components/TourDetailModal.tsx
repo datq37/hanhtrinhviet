@@ -126,31 +126,31 @@ export default function TourDetailModal({
     }
   }, []);
 
-  const normalisedStaticReviews = useMemo<ModalReview[]>(() => {
-    return (staticReviews ?? [])
-      .map((review) => {
-        const author =
-          typeof review.author === "string" && review.author.trim().length
-            ? review.author.trim()
-            : anonymousReviewer;
-        const content =
-          typeof review.content === "string" ? review.content.trim() : "";
-        if (!content.length) {
-          return null;
-        }
-        const date = new Date(review.createdAt);
-        const iso = Number.isNaN(date.getTime()) ? null : date.toISOString();
-        return {
-          id: review.id ?? `static-${Math.random().toString(36).slice(2, 10)}`,
-          author,
-          rating: clampRating(review.rating),
-          content,
-          createdAt: iso,
-          timestamp: iso ? formatReviewTimestamp(iso) : "",
-          source: "static" as const,
-        };
-      })
-      .filter((item): item is ModalReview => Boolean(item));
+  const normalisedStaticReviews = useMemo((): ModalReview[] => {
+    const items: ModalReview[] = [];
+    for (const review of staticReviews ?? []) {
+      const author =
+        typeof review.author === "string" && review.author.trim().length
+          ? review.author.trim()
+          : anonymousReviewer;
+      const content =
+        typeof review.content === "string" ? review.content.trim() : "";
+      if (!content.length) {
+        continue;
+      }
+      const date = new Date(review.createdAt);
+      const iso = Number.isNaN(date.getTime()) ? null : date.toISOString();
+      items.push({
+        id: review.id ?? `static-${Math.random().toString(36).slice(2, 10)}`,
+        author,
+        rating: clampRating(review.rating),
+        content,
+        createdAt: iso,
+        timestamp: iso ? formatReviewTimestamp(iso) : "",
+        source: "static",
+      });
+    }
+    return items;
   }, [anonymousReviewer, clampRating, formatReviewTimestamp, staticReviews]);
 
   const reviewFormId = useMemo(
