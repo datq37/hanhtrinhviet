@@ -12,7 +12,7 @@ const testimonials = [
     content:
       "Tour du lịch được tổ chức rất chuyên nghiệp. Hướng dẫn viên nhiệt tình, chu đáo. Đặc biệt là các điểm tham quan đều rất đẹp và thú vị.",
     rating: 5,
-    tour: "Tour Vịnh Hạ Long 2N1Đ",
+    tour: "Đà Lạt – Thành phố ngàn hoa",
   },
   {
     id: 2,
@@ -22,7 +22,7 @@ const testimonials = [
     content:
       "Chất lượng dịch vụ tuyệt vời, giá cả hợp lý. Đội ngũ nhân viên rất thân thiện và chuyên nghiệp. Chắc chắn sẽ quay lại vào lần sau.",
     rating: 5,
-    tour: "Tour Hang Sơn Đoòng",
+    tour: "Huế – Di sản cố đô",
   },
   {
     id: 3,
@@ -32,7 +32,7 @@ const testimonials = [
     content:
       "Những cảnh đẹp tại Vịnh Hạ Long thực sự đã để lại ấn tượng khó quên. Cảm ơn đội ngũ đã tạo nên một chuyến đi tuyệt vời như vậy.",
     rating: 5,
-    tour: "Tour Vịnh Hạ Long Luxury",
+    tour: "Nha Trang – Biển đảo thiên đường",
   },
 ];
 
@@ -66,7 +66,7 @@ export default function Testimonials() {
 
           {/* Testimonials Slider */}
           <div className="relative">
-            <div className="flex items-center justify-center gap-6">
+            <div className="flex flex-col items-stretch gap-6 md:flex-row md:items-center md:justify-center">
               {testimonials.map((testimonial, index) => (
                 <motion.div
                   key={testimonial.id}
@@ -74,10 +74,10 @@ export default function Testimonials() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.2 }}
-                  className={`w-full max-w-lg transform transition-all duration-500 ${
+                  className={`w-full md:max-w-lg transform transition-all duration-500 ${
                     activeIndex === index
                       ? "scale-100 opacity-100"
-                      : "scale-90 opacity-50"
+                      : "opacity-90 md:scale-90 md:opacity-50"
                   }`}
                   onClick={() => setActiveIndex(index)}
                 >

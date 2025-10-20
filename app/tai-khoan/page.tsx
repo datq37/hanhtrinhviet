@@ -88,6 +88,28 @@ const stayCatalog = [
   },
 ];
 
+const VIETNAM_OFFSET_MINUTES = 7 * 60;
+const pad = (value: number) => value.toString().padStart(2, "0");
+
+const toVietnamTime = (value: string) => {
+  const input = new Date(value);
+  if (Number.isNaN(input.getTime())) return null;
+  const utcMillis = input.getTime() + input.getTimezoneOffset() * 60000;
+  return new Date(utcMillis + VIETNAM_OFFSET_MINUTES * 60000);
+};
+
+const formatDate = (value: string) => {
+  const date = toVietnamTime(value);
+  if (!date) return "";
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+};
+
+const formatDateTime = (value: string) => {
+  const date = toVietnamTime(value);
+  if (!date) return "";
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
 export default function AccountPage() {
   const { profile, supabase, loading: authLoading, refreshProfile } = useSupabase();
   const [balance, setBalance] = useState(0);
@@ -337,9 +359,9 @@ export default function AccountPage() {
     <main className="min-h-screen bg-slate-950 text-white">
       <MainHeader variant="translucent" />
 
-      <section className="relative mt-24 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="flex flex-col gap-8 rounded-3xl border border-white/10 bg-slate-900/60 p-10 shadow-2xl backdrop-blur">
+      <section className="relative mt-16 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 sm:mt-24">
+        <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-16">
+          <div className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-slate-900/60 p-6 shadow-2xl backdrop-blur md:gap-8 md:p-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">
@@ -356,8 +378,8 @@ export default function AccountPage() {
                   Quản lý số dư, thực hiện nạp tiền và xem lịch sử đặt tour/lưu trú của bạn.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm text-white/80">
-                <div className="rounded-2xl bg-white/5 px-6 py-4">
+              <div className="grid gap-3 text-sm text-white/80 sm:grid-cols-2 md:gap-4">
+                <div className="rounded-2xl bg-white/5 px-5 py-4 md:px-6">
                   <p className="text-xs uppercase tracking-[0.3em] text-white/50">
                     Số dư khả dụng
                   </p>
@@ -365,7 +387,7 @@ export default function AccountPage() {
                     {isLoadingData ? "..." : formatCurrency(balance)}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-white/5 px-6 py-4">
+                <div className="rounded-2xl bg-white/5 px-5 py-4 md:px-6">
                   <p className="text-xs uppercase tracking-[0.3em] text-white/50">
                     Số dư đóng băng
                   </p>
@@ -376,10 +398,10 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-[1.2fr,0.8fr]">
-              <div className="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="grid gap-6 md:grid-cols-[1.2fr,0.8fr] md:gap-8">
+              <div className="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6">
                 <h2 className="text-lg font-semibold text-white">Thông tin nạp tiền</h2>
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-xs uppercase tracking-[0.3em] text-white/50">
                       Ngân hàng
@@ -489,7 +511,7 @@ export default function AccountPage() {
                     />
                     <button
                       type="submit"
-                      className="rounded-2xl bg-emerald-500 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-2xl bg-emerald-500 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                       disabled={isSubmittingDeposit}
                     >
                       {isSubmittingDeposit ? "Đang gửi..." : "Xác nhận nạp"}
@@ -510,7 +532,7 @@ export default function AccountPage() {
                   ) : (
                     <div className="mt-4 space-y-4">
                       {depositRequests.map((request) => {
-                        const created = new Date(request.created_at).toLocaleString("vi-VN");
+                        const created = formatDateTime(request.created_at);
                         const statusLabel =
                           request.status === "pending"
                             ? "Đang chờ duyệt"
@@ -539,7 +561,7 @@ export default function AccountPage() {
                                 </p>
                                 {request.processed_at && (
                                   <p className="mt-1 text-xs text-white/50">
-                                    Xử lý: {new Date(request.processed_at).toLocaleString("vi-VN")}
+                                    Xử lý: {formatDateTime(request.processed_at)}
                                   </p>
                                 )}
                               </div>
@@ -557,7 +579,7 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6">
                 <h2 className="text-lg font-semibold text-white">Lưu ý quan trọng</h2>
                 <ul className="space-y-3 text-sm text-white/70">
                   <li>• Thời gian xử lý nạp tiền: 5-10 phút trong giờ hành chính, tối đa 2 giờ ngoài giờ.</li>
@@ -578,10 +600,10 @@ export default function AccountPage() {
       </section>
 
       <section className="bg-slate-950">
-        <div className="mx-auto max-w-6xl px-6 pb-20">
-          <div className="grid gap-10 lg:grid-cols-2">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl">
-              <div className="flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-4 pb-16 md:px-6 md:pb-20">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl md:p-8">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="text-xl font-semibold text-white">Đặt tour nhanh</h2>
                 <span className="text-sm text-white/60">
                   Số dư khả dụng: <span className="font-semibold text-emerald-400">{formatCurrency(balance)}</span>
@@ -601,14 +623,14 @@ export default function AccountPage() {
                       <h3 className="text-lg font-semibold text-white">{tour.name}</h3>
                       <p className="text-sm text-white/60">Thời gian: {tour.duration}</p>
                     </div>
-                    <div className="flex flex-col items-start gap-3 md:items-end">
+                    <div className="flex w-full flex-col items-start gap-3 md:w-auto md:items-end">
                       <span className="text-lg font-semibold text-emerald-400">
                         {formatCurrency(tour.price)}
                       </span>
                       <button
                         type="button"
                         onClick={() => bookTour(tour.id)}
-                        className="rounded-full bg-emerald-500 px-6 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-full bg-emerald-500 px-6 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                         disabled={isProcessingBooking}
                       >
                         {isProcessingBooking ? "Đang xử lý..." : "Đặt tour"}
@@ -619,8 +641,8 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl">
-              <div className="flex items-center justify-between">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl md:p-8">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="text-xl font-semibold text-white">Đặt lưu trú nhanh</h2>
                 <span className="text-sm text-white/60">
                   Số dư khả dụng: <span className="font-semibold text-emerald-400">{formatCurrency(balance)}</span>
@@ -640,14 +662,14 @@ export default function AccountPage() {
                       <h3 className="text-lg font-semibold text-white">{stay.name}</h3>
                       <p className="text-sm text-white/60">Thời gian lưu trú: {stay.nights}</p>
                     </div>
-                    <div className="flex flex-col items-start gap-3 md:items-end">
+                    <div className="flex w-full flex-col items-start gap-3 md:w-auto md:items-end">
                       <span className="text-lg font-semibold text-emerald-400">
                         {formatCurrency(stay.price)}
                       </span>
                       <button
                         type="button"
                         onClick={() => bookStay(stay.id)}
-                        className="rounded-full bg-emerald-500 px-6 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-full bg-emerald-500 px-6 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                         disabled={isProcessingBooking}
                       >
                         {isProcessingBooking ? "Đang xử lý..." : "Đặt phòng"}
@@ -662,8 +684,8 @@ export default function AccountPage() {
             </div>
           </div>
 
-          <div className="mt-12 grid gap-10 lg:grid-cols-2">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl">
+          <div className="mt-10 grid gap-6 lg:mt-12 lg:grid-cols-2 lg:gap-10">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl md:p-8">
               <h2 className="mb-4 text-xl font-semibold text-white">Lịch sử đặt tour</h2>
               {tourHistory.length === 0 ? (
                 <p className="text-sm text-white/60">Bạn chưa có tour nào trong lịch sử. Hãy bắt đầu hành trình đầu tiên.</p>
@@ -671,14 +693,16 @@ export default function AccountPage() {
                 <div className="space-y-4">
                   {tourHistory.map((item) => (
                     <div key={item.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <h3 className="font-semibold text-white">{item.name}</h3>
-                        <span className={`text-xs font-semibold uppercase ${item.status === "completed" ? "text-emerald-400" : "text-amber-400"}`}>
-                          {item.status === "completed" ? "Đã xác nhận" : "Chờ xác nhận"}
-                        </span>
+                        {item.status === "completed" ? (
+                          <span className="text-xs font-semibold uppercase text-emerald-400">
+                            Đã xác nhận
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-white/60">
-                        Ngày đặt: {new Date(item.date).toLocaleDateString("vi-VN")}
+                        Ngày đặt: {formatDate(item.date)}
                       </p>
                       <p className="text-white/60">Mã tham chiếu: {item.reference}</p>
                       <p className="mt-2 font-semibold text-emerald-400">{formatCurrency(item.amount)}</p>
@@ -688,7 +712,7 @@ export default function AccountPage() {
               )}
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl md:p-8">
               <h2 className="mb-4 text-xl font-semibold text-white">Lịch sử đặt lưu trú</h2>
               {stayHistory.length === 0 ? (
                 <p className="text-sm text-white/60">Bạn chưa có lưu trú nào trong lịch sử. Chọn điểm nghỉ dưỡng yêu thích để bắt đầu hành trình.</p>
@@ -696,14 +720,16 @@ export default function AccountPage() {
                 <div className="space-y-4">
                   {stayHistory.map((item) => (
                     <div key={item.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <h3 className="font-semibold text-white">{item.name}</h3>
-                        <span className={`text-xs font-semibold uppercase ${item.status === "completed" ? "text-emerald-400" : "text-amber-400"}`}>
-                          {item.status === "completed" ? "Đã xác nhận" : "Chờ xác nhận"}
-                        </span>
+                        {item.status === "completed" ? (
+                          <span className="text-xs font-semibold uppercase text-emerald-400">
+                            Đã xác nhận
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-white/60">
-                        Ngày đặt: {new Date(item.date).toLocaleDateString("vi-VN")}
+                        Ngày đặt: {formatDate(item.date)}
                       </p>
                       <p className="text-white/60">Mã tham chiếu: {item.reference}</p>
                       <p className="mt-2 font-semibold text-emerald-400">{formatCurrency(item.amount)}</p>

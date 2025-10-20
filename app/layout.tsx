@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="bg-white font-sans">
+      <body className="bg-white font-sans" suppressHydrationWarning>
         <SupabaseProvider>{children}</SupabaseProvider>
       </body>
     </html>

@@ -70,8 +70,15 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
     const pingSupabase = async () => {
       try {
+        const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
         await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`, {
           cache: "no-store",
+          headers: anonKey
+            ? {
+                apikey: anonKey,
+                Authorization: `Bearer ${anonKey}`,
+              }
+            : undefined,
         });
       } catch (error) {
         if (isMounted) {

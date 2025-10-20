@@ -703,6 +703,319 @@ const tours: Tour[] = [
   },
 ];
 
+type TourReviewSeed = {
+  id: string;
+  author: string;
+  rating: number;
+  content: string;
+  createdAt: string;
+};
+
+const defaultTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-default-1",
+    author: "Hải Nam",
+    rating: 5,
+    content:
+      "Hành trình được chuẩn bị chu đáo, gia đình mình rất yên tâm trong suốt chuyến đi.",
+    createdAt: "2025-09-18T17:20:00+07:00",
+  },
+  {
+    id: "rv-default-2",
+    author: "Thuỳ Dương",
+    rating: 4,
+    content:
+      "Lịch trình hợp lý, hướng dẫn viên nhiệt tình. Nếu thêm thời gian trải nghiệm tự do thì sẽ tuyệt vời hơn.",
+    createdAt: "2025-09-05T09:40:00+07:00",
+  },
+  {
+    id: "rv-default-3",
+    author: "Quốc Toàn",
+    rating: 5,
+    content:
+      "Dịch vụ chuyên nghiệp, xe đưa đón đúng giờ và bữa ăn phong phú. Chắc chắn sẽ quay lại.",
+    createdAt: "2025-08-29T15:05:00+07:00",
+  },
+  {
+    id: "rv-default-4",
+    author: "Thùy Trâm",
+    rating: 5,
+    content:
+      "Đội ngũ concierge hỗ trợ 24/7, cả đoàn cảm thấy được chăm sóc kỹ càng từ đầu tới cuối.",
+    createdAt: "2025-08-16T20:50:00+07:00",
+  },
+];
+
+const dalatTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-dl-1",
+    author: "Ngọc Hân",
+    rating: 5,
+    content:
+      "Đà Lạt vào sáng sớm thật đẹp, lịch trình săn mây và check-in được sắp xếp rất hợp lý.",
+    createdAt: "2025-10-12T06:30:00+07:00",
+  },
+  {
+    id: "rv-dl-2",
+    author: "Anh Thi",
+    rating: 5,
+    content:
+      "Homestay ấm cúng, bữa tối BBQ ngoài trời khiến nhóm bạn mình cực kỳ thích thú.",
+    createdAt: "2025-09-25T21:15:00+07:00",
+  },
+  {
+    id: "rv-dl-3",
+    author: "Hoài Bảo",
+    rating: 4,
+    content:
+      "Hướng dẫn viên thân thiện, chia sẻ nhiều câu chuyện thú vị. Nếu thêm thời gian café nữa thì quá tuyệt.",
+    createdAt: "2025-09-11T19:10:00+07:00",
+  },
+  {
+    id: "rv-dl-4",
+    author: "Lan Huệ",
+    rating: 5,
+    content:
+      "Vườn dâu công nghệ cao và trang trại cà phê đúng chất Đà Lạt. Rất đáng để quay lại.",
+    createdAt: "2025-08-30T14:05:00+07:00",
+  },
+];
+
+const hueTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-hue-1",
+    author: "Lệ Quyên",
+    rating: 5,
+    content:
+      "Trải nghiệm áo dài cung đình và ca Huế trên sông Hương khiến chuyến đi đầy cảm xúc.",
+    createdAt: "2025-10-18T20:00:00+07:00",
+  },
+  {
+    id: "rv-hue-2",
+    author: "Đức Tín",
+    rating: 5,
+    content:
+      "Lộ trình kết hợp di sản và nghỉ dưỡng quá hợp lý, gia đình mình ai cũng hài lòng.",
+    createdAt: "2025-09-29T09:20:00+07:00",
+  },
+  {
+    id: "rv-hue-3",
+    author: "Bảo Vy",
+    rating: 4,
+    content:
+      "Ẩm thực Huế ngon khỏi bàn, nếu lịch trình chậm lại một chút thì sẽ tận hưởng nhiều hơn.",
+    createdAt: "2025-09-08T16:45:00+07:00",
+  },
+  {
+    id: "rv-hue-4",
+    author: "Hoàng Phúc",
+    rating: 5,
+    content:
+      "Suối khoáng Thanh Tân thư giãn, concierge chủ động chuẩn bị mọi thứ nên cả đoàn chỉ việc tận hưởng.",
+    createdAt: "2025-08-20T11:30:00+07:00",
+  },
+];
+
+const danangTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-dn-1",
+    author: "Gia Minh",
+    rating: 5,
+    content:
+      "Bà Nà Hills và Cầu Vàng quá ấn tượng, ekip còn chụp giúp gia đình mình rất nhiều tấm ảnh đẹp.",
+    createdAt: "2025-10-05T10:15:00+07:00",
+  },
+  {
+    id: "rv-dn-2",
+    author: "Thanh Hà",
+    rating: 4,
+    content:
+      "Biển Mỹ Khê nước trong xanh, lịch trình cân bằng giữa tham quan và nghỉ dưỡng.",
+    createdAt: "2025-09-21T18:40:00+07:00",
+  },
+  {
+    id: "rv-dn-3",
+    author: "Khánh Ngọc",
+    rating: 5,
+    content:
+      "Team building và gala dinner tổ chức chuyên nghiệp, công ty mình rất ấn tượng.",
+    createdAt: "2025-09-03T20:05:00+07:00",
+  },
+  {
+    id: "rv-dn-4",
+    author: "Tấn Lộc",
+    rating: 5,
+    content:
+      "Concierge theo sát 24/7, hỗ trợ linh hoạt khi gia đình có trẻ nhỏ. Điểm cộng rất lớn!",
+    createdAt: "2025-08-24T13:50:00+07:00",
+  },
+];
+
+const nhatrangTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-nt-1",
+    author: "Thuỳ Linh",
+    rating: 5,
+    content:
+      "Tour 3 đảo cực vui, cả nhà được lặn ngắm san hô và thưởng thức hải sản tươi ngon.",
+    createdAt: "2025-10-08T09:30:00+07:00",
+  },
+  {
+    id: "rv-nt-2",
+    author: "Minh Tâm",
+    rating: 4,
+    content:
+      "Khách sạn ven biển sang trọng, spa bùn khoáng thư giãn. Mình sẽ giới thiệu cho bạn bè.",
+    createdAt: "2025-09-22T14:10:00+07:00",
+  },
+  {
+    id: "rv-nt-3",
+    author: "Quang Hòa",
+    rating: 5,
+    content:
+      "Hướng dẫn viên nhiệt tình, xe đưa đón đời mới. Con nhỏ nhà mình được chăm sóc tận tâm.",
+    createdAt: "2025-09-06T19:25:00+07:00",
+  },
+  {
+    id: "rv-nt-4",
+    author: "Thảo Nhi",
+    rating: 5,
+    content:
+      "VinWonders và cáp treo vượt biển quá đỉnh, lịch trình linh hoạt cho cả người lớn lẫn trẻ em.",
+    createdAt: "2025-08-18T11:05:00+07:00",
+  },
+];
+
+const quangBinhTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-qb-1",
+    author: "Hoài Nam",
+    rating: 5,
+    content:
+      "Động Phong Nha và Thiên Đường hùng vĩ, hướng dẫn viên kể chuyện rất cuốn.",
+    createdAt: "2025-10-02T08:45:00+07:00",
+  },
+  {
+    id: "rv-qb-2",
+    author: "Phương Anh",
+    rating: 5,
+    content:
+      "Zipline và chèo kayak trên sông Chày là trải nghiệm đáng thử. An toàn và thú vị.",
+    createdAt: "2025-09-19T15:20:00+07:00",
+  },
+  {
+    id: "rv-qb-3",
+    author: "Nhật Quang",
+    rating: 4,
+    content:
+      "Resort ven biển sạch đẹp, đồ ăn địa phương lạ miệng. Nếu thời tiết đẹp hơn thì sẽ hoàn hảo.",
+    createdAt: "2025-09-01T17:35:00+07:00",
+  },
+  {
+    id: "rv-qb-4",
+    author: "Thanh Tâm",
+    rating: 5,
+    content:
+      "Lịch trình adventure phù hợp nhóm bạn, nhân viên hỗ trợ chu đáo từ khâu chuẩn bị đến kết thúc.",
+    createdAt: "2025-08-22T12:25:00+07:00",
+  },
+];
+
+const phuYenTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-py-1",
+    author: "Tuyết Mai",
+    rating: 5,
+    content:
+      "Ghềnh Đá Đĩa và Mũi Đại Lãnh đẹp ngỡ ngàng, cảnh bình minh khiến cả đoàn mê mẩn.",
+    createdAt: "2025-10-06T05:55:00+07:00",
+  },
+  {
+    id: "rv-py-2",
+    author: "Đông Phương",
+    rating: 5,
+    content:
+      "Ẩm thực Phú Yên độc đáo, concierge đặt sẵn nhà hàng địa phương nên không phải chờ đợi.",
+    createdAt: "2025-09-23T13:15:00+07:00",
+  },
+  {
+    id: "rv-py-3",
+    author: "Văn Hào",
+    rating: 4,
+    content:
+      "Du thuyền trên Đầm Ô Loan rất chill, nếu có thêm hoạt động cho trẻ em thì sẽ tuyệt hơn.",
+    createdAt: "2025-09-07T18:05:00+07:00",
+  },
+  {
+    id: "rv-py-4",
+    author: "Kim Chi",
+    rating: 5,
+    content:
+      "Concierge chuẩn bị bánh hoa vàng và quà lưu niệm, cảm giác được chăm sóc rất đặc biệt.",
+    createdAt: "2025-08-27T09:40:00+07:00",
+  },
+];
+
+const phanThietTourReviews: TourReviewSeed[] = [
+  {
+    id: "rv-pt-1",
+    author: "Trung Kiên",
+    rating: 5,
+    content:
+      "Đồi cát bay và trải nghiệm trượt cát cực kỳ thú vị, trẻ con mê tít.",
+    createdAt: "2025-09-30T16:10:00+07:00",
+  },
+  {
+    id: "rv-pt-2",
+    author: "Hồng Nhung",
+    rating: 4,
+    content:
+      "Resort sát biển đẹp, đồ ăn hải sản tươi. Nếu di chuyển có xe riêng thì sẽ tiện hơn.",
+    createdAt: "2025-09-14T12:45:00+07:00",
+  },
+  {
+    id: "rv-pt-3",
+    author: "Duy Anh",
+    rating: 5,
+    content:
+      "Làng chài Mũi Né nhiều góc chụp đẹp, concierge hỗ trợ đổi lịch linh hoạt khi thời tiết thay đổi.",
+    createdAt: "2025-08-31T09:55:00+07:00",
+  },
+  {
+    id: "rv-pt-4",
+    author: "Mỹ Tiên",
+    rating: 5,
+    content:
+      "Suối Tiên và đặc sản Phan Thiết được sắp xếp tham quan thông minh, cả đoàn ai cũng vui.",
+    createdAt: "2025-08-19T15:35:00+07:00",
+  },
+];
+
+const TOUR_REVIEW_LIBRARY: Record<string, TourReviewSeed[]> = {
+  default: defaultTourReviews,
+  "dalat-flowers": dalatTourReviews,
+  "dalat-clouds": dalatTourReviews,
+  "hue-heritage": hueTourReviews,
+  "hue-serenity": hueTourReviews,
+  "danang-lights": danangTourReviews,
+  "danang-hoian-spring": danangTourReviews,
+  "nhatrang-paradise": nhatrangTourReviews,
+  "nhatrang-vinwonders": nhatrangTourReviews,
+  "quangbinh-heritage": quangBinhTourReviews,
+  "quangbinh-adventure": quangBinhTourReviews,
+  "phuyen-flower": phuYenTourReviews,
+  "phuyen-vungr0": phuYenTourReviews,
+  "phanthiet-dunes": phanThietTourReviews,
+};
+
+const getStaticReviewsForTour = (tourId: string | number | null | undefined) => {
+  if (tourId === null || tourId === undefined) {
+    return TOUR_REVIEW_LIBRARY.default;
+  }
+  const key = tourId.toString();
+  return TOUR_REVIEW_LIBRARY[key] ?? TOUR_REVIEW_LIBRARY.default;
+};
+
 const destinationOptions = Array.from(
   new Set(tours.map((tour) => tour.destination)),
 );
@@ -1130,6 +1443,7 @@ export default function BookingPage() {
             tourBookingStatus.status === "error" ? tourBookingStatus.message : null,
           activeTourId: tourBookingStatus.activeId,
         }}
+        staticReviews={getStaticReviewsForTour((selectedTour ?? tours[0]).id)}
       />
 
       {/* Gallery */}
