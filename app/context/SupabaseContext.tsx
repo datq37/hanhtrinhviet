@@ -5,6 +5,8 @@ import type { Session, User } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "../lib/supabase/client";
 
+const HEALTH_CHECK_INTERVAL_MS = 4 * 60 * 1000; // 4 phút
+
 export interface Profile {
   id: string;
   full_name: string;
@@ -59,6 +61,41 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!supabase || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      return;
+    }
+
+    let isMounted = true;
+    const pingSupabase = async () => {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`, {
+          cache: "no-store",
+        });
+      } catch (error) {
+        if (isMounted) {
+          console.warn("Không thể ping Supabase health endpoint:", error);
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        void pingSupabase();
+      }
+    };
+
+    void pingSupabase();
+    const intervalId = window.setInterval(pingSupabase, HEALTH_CHECK_INTERVAL_MS);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [supabase]);
 
   const loadSession = useMemo(
     () =>
