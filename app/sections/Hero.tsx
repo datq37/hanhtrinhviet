@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import VideoModal from "../components/VideoModal";
-import ContactModal from "../components/ContactModal";
 import MainHeader from "../components/MainHeader";
 
 const locations = [
@@ -42,7 +41,6 @@ const locations = [
 export default function Hero() {
   const [currentLocation, setCurrentLocation] = useState(locations[0]);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState(locations[0].videoId);
 
   const handleLocationChange = (location: (typeof locations)[0]) => {
@@ -95,7 +93,7 @@ export default function Hero() {
       />
 
       {/* Side Navigation - Destinations Preview */}
-      <div className="absolute right-0 top-0 bottom-0 w-[350px] bg-gray-900/30 backdrop-blur-sm z-10">
+      <div className="absolute right-0 top-0 bottom-0 hidden w-[350px] bg-gray-900/30 backdrop-blur-sm z-10 lg:block">
         <div className="h-full flex flex-col justify-center items-center text-white">
           <div className="text-8xl font-bold mb-3">
             {String(
@@ -110,7 +108,7 @@ export default function Hero() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 mx-[100px] mt-30">
+      <div className="relative z-10 px-6 pt-28 pb-24 sm:px-10 md:px-16 lg:mx-[100px] lg:px-0 lg:pt-36">
         <div className="max-w-[600px] text-white">
           <motion.div
             initial={{ opacity: 0 }}
@@ -128,18 +126,18 @@ export default function Hero() {
                   duration: 0.3,
                   ease: "easeOut",
                 }}
-                className="text-[120px] font-bold leading-[1.1] tracking-tighter"
+                className="text-5xl font-bold leading-tight tracking-tighter sm:text-6xl md:text-7xl lg:text-[120px] lg:leading-[1.1]"
               >
                 {currentLocation.title.toUpperCase()}
               </motion.h1>
             </AnimatePresence>
-            <div className="absolute -bottom-6 right-0 flex flex-col items-end">
-              <span className="text-xl font-light">KHÁM PHÁ</span>
+            <div className="mt-6 text-sm font-medium uppercase tracking-[0.4em] text-white/70 sm:mt-8 sm:text-base lg:absolute lg:-bottom-6 lg:right-0 lg:mt-0 lg:flex lg:flex-col lg:items-end lg:text-xl lg:font-light lg:tracking-[0.3em]">
+              <span>Khám phá</span>
             </div>
           </motion.div>
 
           {/* Journey Path */}
-          <motion.div className="mt-32">
+          <motion.div className="mt-12 sm:mt-20 lg:mt-32">
             <div className="relative">
               <motion.div
                 className="border-b border-dashed border-white/30 absolute w-full top-1/2"
@@ -226,33 +224,7 @@ export default function Hero() {
       </div>
 
       {/* Bottom Controls */}
-      <div className="absolute bottom-10 right-10 z-20 flex items-center space-x-5">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsContactModalOpen(true)}
-          className="cursor-pointer w-12 h-12 rounded-full bg-[#00C951]/10 backdrop-blur-sm flex items-center justify-center hover:bg-[#00C951]/20 transition-colors"
-        >
-          <svg
-            className="w-6 h-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-        </motion.button>
+      <div className="absolute bottom-6 left-0 right-0 z-20 flex items-center justify-center px-6 sm:bottom-8 lg:bottom-10 lg:right-10 lg:left-auto lg:justify-end">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
@@ -290,13 +262,6 @@ export default function Hero() {
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         videoId={currentVideoId}
-      />
-
-      {/* Contact Modal */}
-      <ContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-        currentLocation={currentLocation.title}
       />
     </section>
   );

@@ -72,17 +72,16 @@ const vehicleOptions = [
   "Xe 16 chỗ (Limousine)",
   "Xe 29 chỗ",
   "Xe 45 chỗ",
-  "Tàu thủy riêng",
-  "Trực thăng ngắm cảnh",
 ];
 
 const destinationPresets = [
-  "Hà Nội",
+  "Đà Lạt",
+  "Huế",
   "Đà Nẵng",
-  "Hạ Long",
-  "Ninh Bình",
-  "Phú Quốc",
-  "Sapa",
+  "Nha Trang",
+  "Quảng Bình",
+  "Phú Yên",
+  "Phan Thiết",
 ];
 
 export default function TransportPage() {
@@ -145,7 +144,7 @@ export default function TransportPage() {
             Hành trình trọn vẹn bắt đầu từ cách bạn di chuyển
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/80">
-            Từ xe riêng sang trọng đến chuyến tàu tuyệt đẹp, SEVEN TRAVEL sắp xếp mọi chặng đường để bạn chỉ tập trung tận hưởng.
+            Từ xe riêng sang trọng đến chuyến tàu tuyệt đẹp, HÀNH TRÌNH VIỆT sắp xếp mọi chặng đường để bạn chỉ tập trung tận hưởng.
           </p>
           <Link
             href="#booking"
@@ -162,7 +161,7 @@ export default function TransportPage() {
           <div className="space-y-6">
             <h2 className="text-3xl font-semibold text-slate-900 md:text-4xl">Thuê xe riêng theo yêu cầu</h2>
             <p className="text-sm text-slate-600">
-              Chọn điểm đến, loại xe và thời gian, đội ngũ SEVEN TRAVEL sẽ sắp xếp và báo giá trong thời gian sớm nhất.
+              Chọn điểm đến, loại xe và thời gian, đội ngũ HÀNH TRÌNH VIỆT sẽ sắp xếp và báo giá trong thời gian sớm nhất.
             </p>
             <div className="grid gap-4 md:grid-cols-3">
               {[
@@ -327,7 +326,7 @@ export default function TransportPage() {
               Khách hàng nói gì về dịch vụ di chuyển?
             </h2>
             <p className="mt-3 text-base text-slate-600">
-              Những phản hồi chân thành từ khách hàng đã tin tưởng SEVEN TRAVEL trên mọi hành trình.
+              Những phản hồi chân thành từ khách hàng đã tin tưởng HÀNH TRÌNH VIỆT trên mọi hành trình.
             </p>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
